@@ -3,18 +3,8 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>https://blog.joway.io/en/posts/my-3-posts/</loc>
-    <lastmod>2018-11-02T11:04:52+08:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://blog.joway.io/en/posts/my-2-post/</loc>
-    <lastmod>2018-11-02T11:04:52+08:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://blog.joway.io/en/posts/my-4-posts/</loc>
-    <lastmod>2016-11-02T11:04:52+08:00</lastmod>
+    <loc>https://blog.joway.io/en/posts/coming/</loc>
+    <lastmod>2018-11-02T00:00:00+00:00</lastmod>
   </url>
   
   <url>
@@ -34,7 +24,7 @@
   
   <url>
     <loc>https://blog.joway.io/en/</loc>
-    <lastmod>2018-11-02T11:04:52+08:00</lastmod>
+    <lastmod>2018-11-02T00:00:00+00:00</lastmod>
     <priority>0</priority>
     <xhtml:link
                 rel="alternate"
@@ -50,7 +40,7 @@
   
   <url>
     <loc>https://blog.joway.io/en/posts/</loc>
-    <lastmod>2018-11-02T11:04:52+08:00</lastmod>
+    <lastmod>2018-11-02T00:00:00+00:00</lastmod>
     <priority>0</priority>
     <xhtml:link
                 rel="alternate"

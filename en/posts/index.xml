@@ -6,39 +6,17 @@
     <description>Recent content in Posts on Joway&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 02 Nov 2018 11:04:52 +0800</lastBuildDate>
+    <lastBuildDate>Fri, 02 Nov 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://blog.joway.io/en/posts/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
-      <title>Another Post</title>
-      <link>https://blog.joway.io/en/posts/my-3-posts/</link>
-      <pubDate>Fri, 02 Nov 2018 11:04:52 +0800</pubDate>
+      <title>Coming Soon</title>
+      <link>https://blog.joway.io/en/posts/coming/</link>
+      <pubDate>Fri, 02 Nov 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://blog.joway.io/en/posts/my-3-posts/</guid>
-      <description>&lt;p&gt;This is a post to help showing the &lt;em&gt;complete&lt;/em&gt; rules of this theme.&lt;/p&gt;
-
-&lt;p&gt;A &lt;strong&gt;summary&lt;/strong&gt; is set, the rest is below a &lt;code&gt;&amp;lt;!-- more --&amp;gt;;&lt;/code&gt; tag.&lt;/p&gt;</description>
-    </item>
-    
-    <item>
-      <title>Theme Reference</title>
-      <link>https://blog.joway.io/en/posts/my-2-post/</link>
-      <pubDate>Fri, 02 Nov 2018 11:04:52 +0800</pubDate>
-      
-      <guid>https://blog.joway.io/en/posts/my-2-post/</guid>
-      <description>&lt;p&gt;This is a post to help showing the &lt;em&gt;complete&lt;/em&gt; rules of this theme.&lt;/p&gt;
-
-&lt;p&gt;A &lt;strong&gt;summary&lt;/strong&gt; is set, the rest is below a &lt;code&gt;&amp;lt;!-- more --&amp;gt;;&lt;/code&gt; tag.&lt;/p&gt;</description>
-    </item>
-    
-    <item>
-      <title>It’s Time for Tech Workers to Get Political</title>
-      <link>https://blog.joway.io/en/posts/my-4-posts/</link>
-      <pubDate>Wed, 02 Nov 2016 11:04:52 +0800</pubDate>
-      
-      <guid>https://blog.joway.io/en/posts/my-4-posts/</guid>
+      <guid>https://blog.joway.io/en/posts/coming/</guid>
       <description>&lt;p&gt;This is a post to help showing the &lt;em&gt;complete&lt;/em&gt; rules of this theme.&lt;/p&gt;
 
 &lt;p&gt;A &lt;strong&gt;summary&lt;/strong&gt; is set, the rest is below a &lt;code&gt;&amp;lt;!-- more --&amp;gt;;&lt;/code&gt; tag.&lt;/p&gt;</description>
