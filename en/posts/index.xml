@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Posts on Joway&#39;s Blog</title>
+    <link>https://blog.joway.io/en/posts/</link>
+    <description>Recent content in Posts on Joway&#39;s Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 02 Nov 2018 11:04:52 +0800</lastBuildDate>
+    
+	<atom:link href="https://blog.joway.io/en/posts/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Another Post</title>
+      <link>https://blog.joway.io/en/posts/my-3-posts/</link>
+      <pubDate>Fri, 02 Nov 2018 11:04:52 +0800</pubDate>
+      
+      <guid>https://blog.joway.io/en/posts/my-3-posts/</guid>
+      <description>&lt;p&gt;This is a post to help showing the &lt;em&gt;complete&lt;/em&gt; rules of this theme.&lt;/p&gt;
+
+&lt;p&gt;A &lt;strong&gt;summary&lt;/strong&gt; is set, the rest is below a &lt;code&gt;&amp;lt;!-- more --&amp;gt;;&lt;/code&gt; tag.&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Theme Reference</title>
+      <link>https://blog.joway.io/en/posts/my-2-post/</link>
+      <pubDate>Fri, 02 Nov 2018 11:04:52 +0800</pubDate>
+      
+      <guid>https://blog.joway.io/en/posts/my-2-post/</guid>
+      <description>&lt;p&gt;This is a post to help showing the &lt;em&gt;complete&lt;/em&gt; rules of this theme.&lt;/p&gt;
+
+&lt;p&gt;A &lt;strong&gt;summary&lt;/strong&gt; is set, the rest is below a &lt;code&gt;&amp;lt;!-- more --&amp;gt;;&lt;/code&gt; tag.&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>It’s Time for Tech Workers to Get Political</title>
+      <link>https://blog.joway.io/en/posts/my-4-posts/</link>
+      <pubDate>Wed, 02 Nov 2016 11:04:52 +0800</pubDate>
+      
+      <guid>https://blog.joway.io/en/posts/my-4-posts/</guid>
+      <description>&lt;p&gt;This is a post to help showing the &lt;em&gt;complete&lt;/em&gt; rules of this theme.&lt;/p&gt;
+
+&lt;p&gt;A &lt;strong&gt;summary&lt;/strong&gt; is set, the rest is below a &lt;code&gt;&amp;lt;!-- more --&amp;gt;;&lt;/code&gt; tag.&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

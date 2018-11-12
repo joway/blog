@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  
+  <url>
+    <loc>https://blog.joway.io/en/posts/my-3-posts/</loc>
+    <lastmod>2018-11-02T11:04:52+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.joway.io/en/posts/my-2-post/</loc>
+    <lastmod>2018-11-02T11:04:52+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.joway.io/en/posts/my-4-posts/</loc>
+    <lastmod>2016-11-02T11:04:52+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.joway.io/en/categories/</loc>
+    <priority>0</priority>
+    <xhtml:link
+                rel="alternate"
+                hreflang="cn"
+                href="https://blog.joway.io/categories/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="en"
+                href="https://blog.joway.io/en/categories/"
+                />
+  </url>
+  
+  <url>
+    <loc>https://blog.joway.io/en/</loc>
+    <lastmod>2018-11-02T11:04:52+08:00</lastmod>
+    <priority>0</priority>
+    <xhtml:link
+                rel="alternate"
+                hreflang="cn"
+                href="https://blog.joway.io/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="en"
+                href="https://blog.joway.io/en/"
+                />
+  </url>
+  
+  <url>
+    <loc>https://blog.joway.io/en/posts/</loc>
+    <lastmod>2018-11-02T11:04:52+08:00</lastmod>
+    <priority>0</priority>
+    <xhtml:link
+                rel="alternate"
+                hreflang="cn"
+                href="https://blog.joway.io/posts/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="en"
+                href="https://blog.joway.io/en/posts/"
+                />
+  </url>
+  
+  <url>
+    <loc>https://blog.joway.io/en/tags/</loc>
+    <priority>0</priority>
+    <xhtml:link
+                rel="alternate"
+                hreflang="cn"
+                href="https://blog.joway.io/tags/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="en"
+                href="https://blog.joway.io/en/tags/"
+                />
+  </url>
+  
+</urlset>
