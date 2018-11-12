@@ -1,33 +1,44 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="generator" content="Hugo 0.51"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="author" content="Joway Wang"><meta property="og:url" content="https://blog.joway.io/posts/elasticsearch-bp/"><title>ElasticSearch 最佳实践 - Joway&#39;s Blog</title><meta property="og:title" content="ElasticSearch 最佳实践 - Joway&#39;s Blog"><meta property="og:type" content="article"><meta name="description" content=""><link href="https://fonts.googleapis.com/css?family=Arvo|Permanent+Marker" rel="stylesheet"><link rel="stylesheet" href="/css/flexboxgrid.min.css"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="/css/github-md.css"><link rel="stylesheet" href="/css/highlight/tomorrow-night.css"><link href="/index.xml" rel="alternate" type="application/rss+xml" title="Joway&#39;s Blog"><script async src="https://www.googletagmanager.com/gtag/js?id=UA-53624533-8"></script><script src="https://joway.io/analytics.js"></script></head><body><article class="post"><div class="row"><div class="col-xs-12 col-md-8 col-md-offset-2 col-lg-6 col-lg-offset-3"><a href="https://blog.joway.io/"><div class="head-line"></div></a><header class="post-header"><h1 class="post-title">ElasticSearch 最佳实践</h1><div class="row"><div class="col-xs-6"><time class="post-date" datetime="2017-05-28 00:00:00 UTC">28 May 2017</time></div><div class="col-xs-6"><div class="post-author"><a target="_blank" href="https://joway.io/">@Joway Wang</a></div></div></div></header><div class="post-content markdown-body"><p>Elasticsearch 是一个需要不停调参数的庞然大物 , 从其自身的设置到JVM层面, 有着无数的参数需要根据业务的变化进行调整。最近采用3台 AWS r3.2xlarge , 32GB, 4核, 构建了一套日均日志量过亿的EFK套件。经过不停地查阅文档进行调整优化 , 目前日常CPU占用只在30% , 大部分 Kibana 内的查询都能在 5s ~ 15s 内完成。</p><p>下面记录了一些实践过程中积累的经验。</p><h2 id="硬件">硬件</h2><h3 id="cpu">CPU</h3><ol><li>多核胜过高性能单核CPU</li><li>实践中发现, 在高写入低查询的场景下, 日常状态时 , CPU 还能基本应付, 一旦进行 kibana 上的查询或者 force merge 时, CPU 会瞬间飙高, 从而导致写入变慢, 进而引发需要很长一段实践 cpu 才能降下来。</li></ol><h3 id="mem">Mem</h3><ol><li>Elasticsearch 需要使用大量的堆内存, 而 Lucene 则也需要消耗大量 非堆内存 (off-heap)。推荐给 es 设置本机内存的一半, 如32G 内存的机器上, 设置 -Xmx16g -Xms16g 剩下的内存会被 Lucene 占用。</li><li>如果你不需要对分词字符串做聚合计算（例如，不需要 fielddata ）可以考虑降低堆内存。堆内存越小，Elasticsearch（更快的 GC）和 Lucene（更多的内存用于缓存）的性能越好。</li><li>由于 JVM 的一些机制 , 内存并不是越大越好, 推荐最大只设置到 31 GB 。</li><li>禁用 swap <code>sudo swapoff -a</code></li></ol><h2 id="配置">配置</h2><p>PS: 应该尽可能使用 ansible 这类工具去管理集群 , 否则集群内机器的状态不一致将是一场噩梦。</p><h3 id="jvm">JVM</h3><ul><li>不轻易丢改 jvm 参数 , 现存的参数默认值都是经过设计的, 除非有特殊理由， 否则不需要去修改。</li></ul><h3 id="节点配置">节点配置</h3><h4 id="集群配置">集群配置</h4><p>PUT <code>/_cluster/_settings</code></p><h4 id="对所有索引设置">对所有索引设置</h4><p>PUT <code>/_all/_settings</code></p><pre><code>动态变更集群配置项
-
-    # cluster settings
-    PUT /_cluster/settings
-    {
-         # 永久变更, 它会覆盖掉静态配置文件里的选项
-        &quot;persistent&quot; : {
-            &quot;discovery.zen.minimum_master_nodes&quot; : 2 
-        },
-        # 临时修改 , 重启后清除
-        &quot;transient&quot; : {
-            &quot;indices.store.throttle.max_bytes_per_sec&quot; : &quot;50mb&quot; 
-        }
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="generator" content="Hugo 0.51"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="author" content="Joway Wang"><meta property="og:url" content="https://blog.joway.io/posts/elasticsearch-bp/"><title>ElasticSearch 最佳实践 - Joway&#39;s Blog</title><meta property="og:title" content="ElasticSearch 最佳实践 - Joway&#39;s Blog"><meta property="og:type" content="article"><meta name="description" content=""><link href="https://fonts.googleapis.com/css?family=Arvo|Permanent+Marker" rel="stylesheet"><link rel="stylesheet" href="/css/flexboxgrid.min.css"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="/css/github-md.css"><link rel="stylesheet" href="/css/highlight/tomorrow-night.css"><link href="/index.xml" rel="alternate" type="application/rss+xml" title="Joway&#39;s Blog"><script async src="https://www.googletagmanager.com/gtag/js?id=UA-53624533-8"></script><script src="https://joway.io/analytics.js"></script></head><body><article class="post"><div class="row"><div class="col-xs-12 col-md-8 col-md-offset-2 col-lg-6 col-lg-offset-3"><a href="https://blog.joway.io/"><div class="head-line"></div></a><header class="post-header"><h1 class="post-title">ElasticSearch 最佳实践</h1><div class="row"><div class="col-xs-6"><time class="post-date" datetime="2017-05-28 00:00:00 UTC">28 May 2017</time></div><div class="col-xs-6"><div class="post-author"><a target="_blank" href="https://joway.io/">@Joway Wang</a></div></div></div></header><div class="post-content markdown-body"><p>Elasticsearch 是一个需要不停调参数的庞然大物 , 从其自身的设置到JVM层面, 有着无数的参数需要根据业务的变化进行调整。最近采用3台 AWS r3.2xlarge , 32GB, 4核, 构建了一套日均日志量过亿的 EFK 套件。经过不停地查阅文档进行调整优化 , 目前日常CPU占用只在30% , 大部分 Kibana 内的查询都能在 5s ~ 15s 内完成。</p><p>下面记录了一些实践过程中积累的经验。</p><h2 id="硬件">硬件</h2><h3 id="cpu">CPU</h3><ol><li>多核胜过高性能单核CPU</li><li>实践中发现, 在高写入低查询的场景下, 日常状态时 , CPU 还能基本应付, 一旦进行 kibana 上的查询或者 force merge 时, CPU 会瞬间飙高, 从而导致写入变慢, 需要很长一段时间 cpu 才能降下来。</li></ol><h3 id="mem">Mem</h3><ol><li>Elasticsearch 需要使用大量的堆内存, 而 Lucene 则需要消耗大量非堆内存 (off-heap)。推荐给 ES 设置本机内存的一半, 如32G 内存的机器上, 设置 -Xmx16g -Xms16g ，剩下的内存给 Lucene 。</li><li>如果你不需要对分词字符串做聚合计算（例如，不需要 fielddata ）可以考虑降低堆内存。堆内存越小，Elasticsearch（更快的 GC）和 Lucene（更多的内存用于缓存）的性能越好。</li><li>由于 JVM 的一些机制 , 内存并不是越大越好, 推荐最大只设置到 31 GB 。</li><li>禁用 swap <code>sudo swapoff -a</code></li></ol><h2 id="配置">配置</h2><p>PS: 应该尽可能使用 ansible 这类工具去管理集群 , 否则集群内机器的状态不一致将是一场噩梦。</p><h3 id="jvm">JVM</h3><ul><li>不轻易丢改 jvm 参数 , 除非你明确知道这个参数在做什么。</li></ul><h3 id="节点配置">节点配置</h3><h4 id="集群配置">集群配置</h4><p>PUT <code>/_cluster/_settings</code></p><h4 id="对所有索引设置">对所有索引设置</h4><p>PUT <code>/_all/_settings</code></p><pre><code># cluster settings
+PUT /_cluster/settings
+{
+	 # 永久变更, 它会覆盖掉静态配置文件里的选项
+    &quot;persistent&quot; : {
+        &quot;discovery.zen.minimum_master_nodes&quot; : 2 
+    },
+    # 临时修改 , 重启后清除
+    &quot;transient&quot; : {
+        &quot;indices.store.throttle.max_bytes_per_sec&quot; : &quot;50mb&quot; 
     }
+}
 </code></pre><h4 id="防止脑裂">防止脑裂</h4><pre><code>discovery.zen.minimum_master_nodes &gt; = ( master 候选节点个数 / 2) + 1 
-
-集群最少需要有两个 node , 才能保证既可以不脑裂, 又可以高可用
-</code></pre><h3 id="segment">Segment</h3><p>es 为了搜索性能不被后台 merge 影响 , 对它进行了限速。</p><p>如果使用的是 SSD , 需要手动调高 elasticsearch 的 throttle 。[尤其是对高写入的服务]</p><pre><code>PUT /_cluster/settings
+</code></pre><p>集群最少需要有两个 node , 才能保证既可以不脑裂, 又可以高可用</p><h3 id="segment">Segment</h3><p>es 为了搜索性能不被后台 merge 影响 , 对它进行了限速。</p><p>如果使用的是 SSD , 需要手动调高 elasticsearch 的 throttle 。[尤其是对高写入的服务]</p><pre><code>PUT /_cluster/settings
 {
     &quot;persistent&quot; : {
         &quot;indices.store.throttle.max_bytes_per_sec&quot; : &quot;100mb&quot;
     }
 }
-</code></pre><h2 id="故障恢复">故障恢复</h2><h3 id="恢复集群">恢复集群</h3><p>当有节点掉线的时候 , 其余节点选举 master , rebalance data , copy shards , 整个集群网络和IO会大幅度上升 , 等到有节点加入的时候 , 该节点会删除本地已经被复制的数据, 然后再进行 rebalance . 这个过程需要大量时间。但是假如数据的 replica set 存在于当前活跃的节点中 , 则整个集群仍旧是出于可用状态 , status 是 yellow .</p><p>但在实践中发现 , 当一台机器被打挂后 , 压力均摊到其余机器, 会把其余机器也给打挂。在成本不允许添加更多机器时, 我们需要做好随时重启集群的准备。这个时候, es 漫长的恢复流程是一个噩梦。</p><p>设置下几个个参数可以让我们</p><ol><li>等待集群至少存在 8 个节点 后才能进行数据恢复。</li><li>等待 5 分钟，或者 10 个节点上线后，才进行数据恢复，这取决于哪个条件先达到。 gateway.recover_after_nodes: 8 gateway.expected_nodes: 10 gateway.recover_after_time: 5m<br></li></ol><p>这些配置只能设置在 config/elasticsearch.yml 文件中或者是在命令行里（它们不能动态更新）它们只在整个集群重启的时候有实质性作用。</p><p>另外, 我们也能够通过设置延迟分配来阻止 当某个 Node 临时 下线时候的延迟分配。下面的操作能够延迟5分钟分配, 若此时 Node 又恢复回来了则不进行再分配。</p><pre><code>PUT /_all/_settings 
+</code></pre><h2 id="故障恢复">故障恢复</h2><h3 id="恢复集群">恢复集群</h3><p>当有节点掉线的时候 , 其余节点会选举 master , 并 rebalance data &amp;&amp; copy shards , 这时整个集群网络和IO会大幅度上升 , 等到有节点加入的时候 , 该节点会删除本地已经被复制的数据, 然后再进行 rebalance。这个过程需要大量时间。但是假如数据的 replica set 存在于当前活跃的节点中 , 则整个集群仍旧是出于可用状态 , status 会变成 yellow。</p><p>在实践中发现 , 当一台机器被打挂后 , 压力均摊到其余机器, 会把其余机器也给打挂。这种场景下，与其雪崩，不如挂掉以后停止自动恢复，等挂掉的机器自己重启并假如集群。</p><p>设置下几个个参数可以帮助我们做这个权衡:</p><pre><code>gateway.recover_after_nodes: 8 # 等待集群至少存在 8 个节点 后才能进行数据恢复
+gateway.expected_nodes: 10
+gateway.recover_after_time: 5m # 等待 5 分钟，或者 10 个节点上线后，才进行数据恢复，这取决于哪个条件先达到
+</code></pre><p>这些配置只能设置在 config/elasticsearch.yml 文件中或者是在命令行里（它们不能动态更新）。</p><p>另外, 我们也能够通过设置延迟分配来阻止当某个 Node 临时下线时候触发 reassign 。下面的操作能够延迟5分钟分配, 若此时 Node 又恢复回来了则不进行再分配。</p><pre><code>PUT /_all/_settings 
 {
   &quot;settings&quot;: {
     &quot;index.unassigned.node_left.delayed_timeout&quot;: &quot;5m&quot; 
   }
 }
-</code></pre><h3 id="滚动重启-升级">滚动重启/升级</h3><h4 id="前期准备">前期准备</h4><ul><li>可能的话，停止索引新的数据。</li><li>禁止分片分配。这一步阻止 Elasticsearch 再平衡缺失的分片，直到你告诉它可以进行了。 PUT /_cluster/settings { &ldquo;transient&rdquo; : { &ldquo;cluster.routing.allocation.enable&rdquo; : &ldquo;none&rdquo; } }</li><li>关闭单个节点</li><li>执行维护/升级</li><li>重启节点，然后确认它加入到集群了</li><li>重启分片分配 PUT /_cluster/settings { &ldquo;transient&rdquo; : { &ldquo;cluster.routing.allocation.enable&rdquo; : &ldquo;all&rdquo; } }</li><li>对其它Node同样进行此类操作</li></ul><h2 id="tips">Tips</h2><ol><li>降低 Input 组件并发程度(降低实时性要求), fluentd 线程从 4 减少到 1 时 , ES 有负载有明显降低。</li></ol></div><div class="post-comments"><div id="disqus_thread"></div><script>(function() {
+</code></pre><h3 id="滚动重启-升级">滚动重启/升级</h3><h4 id="前期准备">前期准备</h4><ul><li>可能的话，停止索引新的数据。</li><li><p>禁止分片分配。这一步阻止 Elasticsearch 再平衡缺失的分片，直到你告诉它可以进行了。</p><pre><code>PUT /_cluster/settings
+    {
+        &quot;transient&quot; : {
+            &quot;cluster.routing.allocation.enable&quot; : &quot;none&quot;
+        }
+    }
+</code></pre></li><li><p>关闭单个节点</p></li><li><p>执行维护/升级</p></li><li><p>重启节点，然后确认它加入到集群了</p></li><li><p>重启分片分配</p><pre><code>PUT /_cluster/settings
+{
+    &quot;transient&quot; : {
+        &quot;cluster.routing.allocation.enable&quot; : &quot;all&quot;
+    }
+}
+</code></pre></li><li><p>对其它Node同样进行此类操作</p></li></ul><h2 id="tips">Tips</h2><ol><li>降低日志收集组件的并发程度(降低实时性要求), fluentd 线程从 4 减少到 1 时 , ES 有负载有明显降低。</li><li>在 fluentd 与 ES 中间加入一个 kafka 作为消息缓存，这样无论日志量瞬间增加多少倍，ES 都能平滑地消费 kafka 。</li></ol></div><div class="post-comments"><div id="disqus_thread"></div><script>(function() {
     
     var d = document,
       s = d.createElement("script");
