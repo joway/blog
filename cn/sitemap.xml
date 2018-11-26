@@ -3,6 +3,11 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>https://blog.joway.io/posts/learn-algorithm-not-result/</loc>
+    <lastmod>2018-11-26T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://blog.joway.io/posts/avatar-matcher/</loc>
     <lastmod>2018-09-27T00:00:00+00:00</lastmod>
   </url>
@@ -109,7 +114,7 @@
   
   <url>
     <loc>https://blog.joway.io/</loc>
-    <lastmod>2018-09-27T00:00:00+00:00</lastmod>
+    <lastmod>2018-11-26T00:00:00+00:00</lastmod>
     <priority>0</priority>
     <xhtml:link
                 rel="alternate"
@@ -125,7 +130,7 @@
   
   <url>
     <loc>https://blog.joway.io/posts/</loc>
-    <lastmod>2018-09-27T00:00:00+00:00</lastmod>
+    <lastmod>2018-11-26T00:00:00+00:00</lastmod>
     <priority>0</priority>
     <xhtml:link
                 rel="alternate"
