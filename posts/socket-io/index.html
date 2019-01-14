@@ -25,7 +25,7 @@ socket.io 并不等同于 websocket 框架，它在运行平台不支持 websock
       "datePublished": "2018-09-18 00:00:00 &#43;0000 UTC",
       "dateModified" : "2018-09-18 00:00:00 &#43;0000 UTC",
       "url" : "https://blog.joway.io/posts/socket-io/",
-      "keywords" : [ "Blog", "Joway's Blog", "Joway" ]
+      "keywords" : [  ]
   }</script><title>即刻多端实时通信实践 - Joway&#39;s Blog</title><meta property="og:title" content="即刻多端实时通信实践 - Joway&#39;s Blog"><meta property="og:type" content="article"><meta name="description" content="背景 jike-io 是即刻基于 socket.io 构建的一个实时通信基础设施。目前客户端上的所有实时通信服务都是建立在其基础上，涵盖了私信、消息通知、用户反馈、活动页小游戏等诸多组件。
 在目前即刻的实时通信设计里，我们的实时通信只是为了让服务端主动推送消息给客户端，客户端不会主动通过 websocket 发送消息。由于几乎我们所有需要发送消息的请求都会有一定业务逻辑在，而这个业务逻辑我们并不希望 websocket 连接层(jike-io)去处理，所以我们仍旧采用传统 HTTP 请求的方式去发送请求。至于之后是否需要推送消息给用户，由服务端调用 jike-io 的接口进行实现。
 在客户端层面，每一个在线用户都会向服务端建立一个 websocekt 连接，后端会为每一个用户建立一个单独的 room 。所有需要通知到该用户的消息都会使用该 websocket 连接进行推送。这种设计相较于针对不同场景建立不同的room的方案，带来的好处是无论需求如何变化，我们的 room 数目永远是和在线用户数一致了，避免个别复杂需求导致 room 数目暴涨。而具体消息类型我们通过自己定义数据格式来进行鉴别。
