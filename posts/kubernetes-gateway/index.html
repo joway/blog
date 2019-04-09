@@ -1,17 +1,14 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="generator" content="Hugo 0.54.0"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="author" content="Joway Wang"><meta property="og:url" content="https://blog.joway.io/posts/kubernetes-gateway/"><link rel="canonical" href="https://blog.joway.io/posts/kubernetes-gateway/"><link rel="shortcut icon" href="https://blog.joway.io/logo.png" type="image/x-png"><script type="application/ld+json">{
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="generator" content="Hugo 0.55.0"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="author" content="Joway Wang"><meta property="og:url" content="https://blog.joway.io/posts/kubernetes-gateway/"><link rel="canonical" href="https://blog.joway.io/posts/kubernetes-gateway/"><link rel="shortcut icon" href="https://blog.joway.io/logo.png" type="image/x-png"><script type="application/ld+json">{
       "@context" : "http://schema.org",
       "@type" : "BlogPosting",
       "mainEntityOfPage": {
            "@type": "WebPage",
-           "@id": "https://blog.joway.io/"
+           "@id": "https:\/\/blog.joway.io\/"
       },
       "articleSection" : "posts",
       "name" : "Kubernetes 中使用 API Gateway 替代 Ingress",
       "headline" : "Kubernetes 中使用 API Gateway 替代 Ingress",
-      "description" : "背景 最近在构思基于 Kubernetes 建立一个个人的开放云平台 , 听起来有点不自量力 , 不过作为个人业余小玩意还是蛮好玩的。最终的成品希望是用户能够轻松地在平台上跑一些简单的无状态服务 和 cronjob 。
-在搭建平台的时候遇到的第一个困难是需要有一个好用且功能全面的 API Gateway , 主流的网关服务大多是基于 OpenResty 基础上进行二次开发 , 所需要完成的工作无非是负载均衡，和 API 管理, 加上一些零零碎碎的小功能。
-负载均衡 负载均衡分为四层和七层两种 , 以大家所熟知的 Nginx 为例 , 在它的 conf 文件中 , 有 http {} 和 stream {} 两种 block 。
-# 四层负载均衡 stream { server { listen 80; proxy_pass app; } upstream app { server 172.31.0.1:8000; } } # 七层负载均衡 http { upstream app { server 192.",
+      "description" : "背景 最近在构思基于 Kubernetes 建立一个个人的开放云平台 , 听起来有点不自量力 , 不过作为个人业余小玩意还是蛮好玩的。最终的成品希望是用户能够轻松地在平台上跑一些简单的无状态服务 和 cronjob 。\n在搭建平台的时候遇到的第一个困难是需要有一个好用且功能全面的 API Gateway , 主流的网关服务大多是基于 OpenResty 基础上进行二次开发 , 所需要完成的工作无非是负载均衡，和 API 管理, 加上一些零零碎碎的小功能。\n负载均衡 负载均衡分为四层和七层两种 , 以大家所熟知的 Nginx 为例 , 在它的 conf 文件中 , 有 http {} 和 stream {} 两种 block 。\n# 四层负载均衡 stream { server { listen 80; proxy_pass app; } upstream app { server 172.31.0.1:8000; } } # 七层负载均衡 http { upstream app { server 192.",
       "inLanguage" : "en-US",
       "author" : "Joway Wang",
       "creator" : "Joway Wang",
@@ -19,9 +16,9 @@
       "accountablePerson" : "Joway Wang",
       "copyrightHolder" : "Joway Wang",
       "copyrightYear" : "2017",
-      "datePublished": "2017-09-12 00:00:00 &#43;0000 UTC",
-      "dateModified" : "2017-09-12 00:00:00 &#43;0000 UTC",
-      "url" : "https://blog.joway.io/posts/kubernetes-gateway/",
+      "datePublished": "2017-09-12 00:00:00 \x2b0000 UTC",
+      "dateModified" : "2017-09-12 00:00:00 \x2b0000 UTC",
+      "url" : "https:\/\/blog.joway.io\/posts\/kubernetes-gateway\/",
       "keywords" : [  ]
   }</script><title>Kubernetes 中使用 API Gateway 替代 Ingress - Joway&#39;s Blog</title><meta property="og:title" content="Kubernetes 中使用 API Gateway 替代 Ingress - Joway&#39;s Blog"><meta property="og:type" content="article"><meta name="description" content="背景 最近在构思基于 Kubernetes 建立一个个人的开放云平台 , 听起来有点不自量力 , 不过作为个人业余小玩意还是蛮好玩的。最终的成品希望是用户能够轻松地在平台上跑一些简单的无状态服务 和 cronjob 。
 在搭建平台的时候遇到的第一个困难是需要有一个好用且功能全面的 API Gateway , 主流的网关服务大多是基于 OpenResty 基础上进行二次开发 , 所需要完成的工作无非是负载均衡，和 API 管理, 加上一些零零碎碎的小功能。
