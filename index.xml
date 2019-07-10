@@ -6,10 +6,25 @@
     <description>Recent content on Joway&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 11 Jun 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 09 Jul 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://blog.joway.io/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>SSD 背后的奥秘</title>
+      <link>https://blog.joway.io/posts/ssd-notes/</link>
+      <pubDate>Tue, 09 Jul 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.joway.io/posts/ssd-notes/</guid>
+      <description>过去很长一段时间里，我对 SSD 的了解仅限于其和 HDD 的区别和一个标签化的「速度快」认知，至于其什么时候快，为什么快却鲜有了解。直到最近开始研究数据库时，发现数据库设计和存储发展和特性紧密联系，不可分割，于是才开始回过头关注起 SSD 的结构和原理，猛然发现之前关于 SSD 有许多非常错误的认识。
+SSD 的基本结构 在了解 SSD 性质前，简单回顾下 SSD 的基本结构组成，下面是两张 SSD 的架构图：
+其中，SSD Controller 用以执行耗损平衡、垃圾回收、坏快映射、错误检查纠正、加密等功能。相比与 HDD，它的工作非常繁重，而这些工作极大地影响了 SSD 的性能表现，后文会详细谈到。SSD 内部的闪存（Flash）由一个个闪存单元组成，每个闪存单元都有一个寿命，超过寿命将导致坏块。常见有三种闪存单元类型：
+ SLC：每个单元 1 比特 MLC：每个单元 2 比特 TLC：每个单元 3 比特  每种 NAND 类型有不同的性能和寿命表现，如下表：
+闪存单元内部由一个个 Block 组成，每个 Block 由多个 Page 组成。
+对于闪存的访问有以下限制：
+ 读写数据只能以 Page 为单位 擦除数据只能以 Block 为单位  每个 Page 大小一般为 2 KB 到 16 KB，这意味着使用 SSD 时，哪怕读或写 1 Byte 的数据，SSD 依旧会访问整个 Page。</description>
+    </item>
     
     <item>
       <title>什么是真正的编程能力</title>

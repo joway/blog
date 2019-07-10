@@ -4,7 +4,7 @@
   
   <url>
     <loc>https://blog.joway.io/</loc>
-    <lastmod>2019-06-11T00:00:00+00:00</lastmod>
+    <lastmod>2019-07-09T00:00:00+00:00</lastmod>
     <priority>0</priority>
     <xhtml:link
                 rel="alternate"
@@ -20,7 +20,7 @@
   
   <url>
     <loc>https://blog.joway.io/posts/</loc>
-    <lastmod>2019-06-11T00:00:00+00:00</lastmod>
+    <lastmod>2019-07-09T00:00:00+00:00</lastmod>
     <priority>0</priority>
     <xhtml:link
                 rel="alternate"
@@ -32,6 +32,11 @@
                 hreflang="cn"
                 href="https://blog.joway.io/posts/"
                 />
+  </url>
+  
+  <url>
+    <loc>https://blog.joway.io/posts/ssd-notes/</loc>
+    <lastmod>2019-07-09T00:00:00+00:00</lastmod>
   </url>
   
   <url>
