@@ -62,7 +62,7 @@ gateway.recover_after_time: 5m # 等待 5 分钟，或者 10 个节点上线后�
         &quot;cluster.routing.allocation.enable&quot; : &quot;all&quot;
     }
 }
-</code></pre></li><li><p>对其它Node同样进行此类操作</p></li></ul><h2 id="tips">Tips</h2><ol><li>降低日志收集组件的并发程度(降低实时性要求), fluentd 线程从 4 减少到 1 时 , ES 有负载有明显降低。</li><li>在 fluentd 与 ES 中间加入一个 kafka 作为消息缓存，这样无论日志量瞬间增加多少倍，ES 都能平滑地消费 kafka 。</li></ol></div><div class="post-ads"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-6400651395935595" data-ad-slot="5705651853" data-ad-format="auto" data-full-width-responsive="true"></ins></div><div class="post-comments"><div id="disqus_thread"></div><script>window.addEventListener("load", () => {
+</code></pre></li><li><p>对其它Node同样进行此类操作</p></li></ul><h2 id="tips">Tips</h2><ol><li>降低日志收集组件的并发程度(降低实时性要求), fluentd 线程从 4 减少到 1 时 , ES 有负载有明显降低。</li><li>在 fluentd 与 ES 中间加入一个 kafka 作为消息缓存，这样无论日志量瞬间增加多少倍，ES 都能平滑地消费 kafka 。</li></ol></div><div class="releated"><h3>See Also</h3><ul><li><a href="https://blog.joway.io/posts/golang-talk/">Golang : Make Programming Happy Again</a></li><li><a href="https://blog.joway.io/posts/podcast/">Podcast 闲言碎语</a></li><li><a href="https://blog.joway.io/posts/kubernetes-gateway/">Kubernetes 中使用 API Gateway 替代 Ingress</a></li></ul></div><div class="post-ads"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-6400651395935595" data-ad-slot="5705651853" data-ad-format="auto" data-full-width-responsive="true"></ins></div><div class="post-comments"><div id="disqus_thread"></div><script>window.addEventListener("load", () => {
     (function() {
       
       var d = document,
