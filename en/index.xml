@@ -6,20 +6,19 @@
     <description>Recent content on Joway&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 02 Nov 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 23 Jul 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://blog.joway.io/en/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
-      <title>Coming Soon</title>
-      <link>https://blog.joway.io/en/posts/coming/</link>
-      <pubDate>Fri, 02 Nov 2018 00:00:00 +0000</pubDate>
+      <title>How to write a Database - Index</title>
+      <link>https://blog.joway.io/en/posts/how-to-write-a-database-index/</link>
+      <pubDate>Tue, 23 Jul 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://blog.joway.io/en/posts/coming/</guid>
-      <description>&lt;p&gt;This is a post to help showing the &lt;em&gt;complete&lt;/em&gt; rules of this theme.&lt;/p&gt;
-
-&lt;p&gt;A &lt;strong&gt;summary&lt;/strong&gt; is set, the rest is below a &lt;code&gt;&amp;lt;!-- more --&amp;gt;;&lt;/code&gt; tag.&lt;/p&gt;</description>
+      <guid>https://blog.joway.io/en/posts/how-to-write-a-database-index/</guid>
+      <description>Google Slides:
+https://docs.google.com/presentation/d/1d-a9nIVqRE7ARkHAIBA_uUfZCLVm1FpZV5soZZw32yk/edit?usp=sharing</description>
     </item>
     
   </channel>
