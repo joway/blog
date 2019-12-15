@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>技术 on Joway's Blog</title><link>https://blog.joway.io/categories/%E6%8A%80%E6%9C%AF/</link><description>Recent content in 技术 on Joway's Blog</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sun, 10 Nov 2019 00:00:00 +0000</lastBuildDate><atom:link href="https://blog.joway.io/categories/%E6%8A%80%E6%9C%AF/index.xml" rel="self" type="application/rss+xml"/><item><title>NodeJS 内存泄漏检测与定位</title><link>https://blog.joway.io/posts/nodejs-debug/</link><pubDate>Sun, 10 Nov 2019 00:00:00 +0000</pubDate><guid>https://blog.joway.io/posts/nodejs-debug/</guid><description>最近解决了一个 Node.JS 应用内存泄漏 Bug，顺便学会了用 Chrome DevTools 去看 heapdump 文件。这里做一些简单的记录。
+如何「优雅地」获得 heapdump 文件 由于我们所有应用都是以容器部署的，所以要去获得某个容器内的文件，并拷贝到本地难度还是比较大，也非常麻烦。考虑到调试时或许会需要下载非常多次的 snapshot 文件，建议可以包下 heapdump 库，做成一个接口，把文件 dump 之后再传输给客户端，这样一劳永逸。
+需要小心的是，在 heapdump 的时候内存很容易翻倍，所以当内存超过 500 MB的时候如果去 heapdump 非常容易导致 OOM 从而 Crash。
+如何检测内存泄漏 检查内存泄漏有两种方法，一种是针对比较大的内存泄漏可以直接观察内存是否一直在稳步上升。如果是一些小的泄漏使得内存上升变化并不非常明显的话，可以通过对比不同时间的 heapdump 文件。
+有时候内存上升也可能是因为本身访问量就在上升，所以需要两者对比着分析。
+Heapdump 文件对比 通过下载两份间隔一段时间(几分钟)的 heapdump 文件，打开 Chrome DevTools，进入 Memory Tab，选择 Load。选中其中时间更近的 heapdump ，并选择 Comparison，比较对象是老的那份 heapdump：
+此时可以选择按 Delta 排序，可以看到两个时间点增加了哪些新的对象。
+如图可以看到 string 和 Object 的 Delta 是差不多的，所以可以比较确定是由于 Object 里产生了大量一些 string 对象导致的数量增多，但并不一定能够100%确定是内存泄漏，也可能是正常业务波动。此时需要再拉新的一个时间点的 heapdump 文件再来对比，如果一直在增加，那么内存泄漏的可能性就非常大了。
+如何定位内存泄漏 首先依旧是拿到 heapdump 文件，并在 Chrome 中打开。</description></item><item><title>设计实现高性能本地内存缓存</title><link>https://blog.joway.io/posts/modern-memory-cache/</link><pubDate>Sun, 10 Nov 2019 00:00:00 +0000</pubDate><guid>https://blog.joway.io/posts/modern-memory-cache/</guid><description>本地内存缓存是一个在基础软件架构中非常常见的基础设施，也正因其过于常见，以至于平时很少去思考它是如何实现的。在尚未设计缓存系统前，完全没想到原来要需要考虑如此多复杂的事情。本文将由浅入深介绍如何设计一个现代的高性能内存缓存系统。
+什么时候需要本地内存缓存 在大部分业务系统中，都会使用诸如 Redis、Memcached 等远程缓存，一方面可以避免自身进程内存占用过大而导致的 OOM 或 GC 问题，另一方面也可以实现多个进程共享同一份一致的缓存数据。但对于某些底层服务（例如数据库服务），远程缓存的网络延迟是不可接受的，这就势必需要引入本地内存缓存。
+本地内存缓存的特点 本地内存缓存可被视作一个基于本地内存的 「KeyValue 数据库」。但相比较于传统数据库而言，它对一致性的要求十分宽松：
+对于更新与删除的操作，需要保证强一致性 对于插入操作可以容忍少量丢失 对于读取操作可以容忍少量 Miss 与磁盘数据库的另一个不同之处在于，磁盘数据库的设计有一个前提假设是磁盘是可以随需要而不断扩容的，倘若一个磁盘数据库因磁盘占满而崩溃主要责任是在使用方。而内存缓存则没有这么宽容的假设可以建立，它必须考虑到内存是昂贵且有限的这一事实。
+除此之外，由于本地内存缓存处于业务进程当中，所以其需要考虑更多业务向的问题，比如：
+由于自身大量老生代的内存占用，是否会对所处进程产生 GC 问题。 当多线程场景下，如何同时解决线程安全、数据竞争、高吞吐等问题。 需要能够适应一些非随机的访问统计规律，例如 Zipf。 综上所述，我们可以归纳出对一个优秀的本地内存缓存系统的要求：
+线程安全 高吞吐 高命中率 支持内存限制 实现路径 在实现一个完整的缓存系统前，我们需要将目标一步步拆解。
+首先为了实现缓存逻辑，我们必须有一个类 Map 的 KeyValue 数据结构，同时它必须是线程安全的。为了支持内存限制，我们必须要能够驱逐一些 key，所以需要实现一个驱逐器。为了实现驱逐的同时维持高命中率，我们还需要告诉驱逐器每个 key 的访问记录，让它能够从中分析出哪些 key 可以被驱逐。综上分析，我们可以整理出一个大概的 Roadmap：
+实现一个线程安全的 Map 数据结构：存储缓存内容 实现一个访问记录队列：存储访问记录 实现一个驱逐器：管理缓存内容 本文所有代码均使用 Golang 编写。
+线程安全的 Map 简易的 Map cache := map[string]string{} cache[&amp;quot;a&amp;quot;] = &amp;quot;b&amp;quot; 在 key 数量固定且极少的情况下，我们一般会用原生 Map 直接实现一个最简单缓存。但 Golang 原生 Map 并不是线程安全的，当多个 goroutine 同时读写该对象时，会发生冲突。</description></item><item><title>Linux I/O 栈浅析</title><link>https://blog.joway.io/posts/linux-io-stack/</link><pubDate>Sun, 11 Aug 2019 00:00:00 +0000</pubDate><guid>https://blog.joway.io/posts/linux-io-stack/</guid><description>在 Linux 中，所有外部资源都以文件形式作为一个抽象视图，并提供一套统一的接口给应用程序调用。本文将以宏观视角试图阐述 Linux 中关于文件 IO 的整个调用脉络。
+VFS 在 Linux 中，所有 IO 都必须先经由 VFS 层进行转发。通过 VFS 将包括磁盘、网络 Socket、打印机、管道等资源全部封装成统一的接口。
+基础结构 VFS 自顶向下使用四个数据结构来描述文件：
+file: 存放一个文件对象的信息。 struct file { union { struct llist_node fu_llist; struct rcu_head fu_rcuhead; } f_u; struct path f_path; struct inode *f_inode; /* cached value */ const struct file_operations *f_op; struct mutex f_pos_lock; loff_t f_pos; } dentry: 存放目录项和其下的文件链接信息。 struct dentry { unsigned int d_flags; seqcount_t d_seq; struct hlist_bl_node d_hash; /* 哈希链表 */ struct dentry *d_parent; /* 父目录项 */ struct qstr d_name; /* 目录名 */ struct inode *d_inode; /* 对应的索引节点 */ unsigned char d_iname[DNAME_INLINE_LEN]; /* small names */ struct lockref d_lockref; /* per-dentry lock and refcount */ const struct dentry_operations *d_op; /* dentry操作 */ struct super_block *d_sb; /* 文件的超级块对象 */ unsigned long d_time; void *d_fsdata; struct list_head d_lru; /* LRU list */ struct list_head d_child; /* child of parent list */ struct list_head d_subdirs; /* our children */ union { struct hlist_node d_alias; /* inode alias list */ struct rcu_head d_rcu; } d_u; } inode: 索引节点对象，存在具体文件的一般信息，文件系统中的文件的唯一标识。 struct inode { struct hlist_node i_hash; /* 散列表，用于快速查找inode */ struct list_head i_list; /* 相同状态索引节点链表 */ struct list_head i_sb_list; /* 文件系统中所有节点链表 */ struct list_head i_dentry; /* 目录项链表 */ unsigned long i_ino; /* 节点号 */ atomic_t i_count; /* 引用计数 */ unsigned int i_nlink; /* 硬链接数 */ uid_t i_uid; /* 使用者id */ gid_t i_gid; /* 使用组id */ struct timespec i_atime; /* 最后访问时间 */ struct timespec i_mtime; /* 最后修改时间 */ struct timespec i_ctime; /* 最后改变时间 */ const struct inode_operations *i_op; /* 索引节点操作函数 */ const struct file_operations *i_fop; /* 缺省的索引节点操作 */ struct super_block *i_sb; /* 相关的超级块 */ struct address_space *i_mapping; /* 相关的地址映射 */ struct address_space i_data; /* 设备地址映射 */ unsigned int i_flags; /* 文件系统标志 */ void *i_private; /* fs 私有指针 */ unsigned long i_state; }; superblock: 超级块对象，记录该文件系统的整体信息。在文件系统安装时建立，在文件系统卸载时删除。 链接 硬链接 VS 软链接:</description></item><item><title>SSD 背后的奥秘</title><link>https://blog.joway.io/posts/ssd-notes/</link><pubDate>Tue, 09 Jul 2019 00:00:00 +0000</pubDate><guid>https://blog.joway.io/posts/ssd-notes/</guid><description>过去很长一段时间里，我对 SSD 的了解仅限于其和 HDD 的区别和一个标签化的「速度快」认知，至于其什么时候快，为什么快却鲜有了解。直到最近开始研究数据库时，发现数据库设计和存储发展和特性紧密联系，不可分割，于是才开始回过头关注起 SSD 的结构和原理，猛然发现之前关于 SSD 有许多非常错误的认识。
+SSD 的基本结构 在了解 SSD 性质前，简单回顾下 SSD 的基本结构组成，下面是两张 SSD 的架构图：
+其中，SSD Controller 用以执行耗损平衡、垃圾回收、坏快映射、错误检查纠正、加密等功能。相比与 HDD，它的工作非常繁重，而这些工作极大地影响了 SSD 的性能表现，后文会详细谈到。SSD 内部的闪存（Flash）由一个个闪存单元组成，每个闪存单元都有一个寿命，超过寿命将导致坏块。常见有三种闪存单元类型：
+SLC：每个单元 1 比特 MLC：每个单元 2 比特 TLC：每个单元 3 比特 每种 NAND 类型有不同的性能和寿命表现，如下表：
+闪存单元内部由一个个 Block 组成，每个 Block 由多个 Page 组成。
+对于闪存的访问有以下限制：
+读写数据只能以 Page 为单位 擦除数据只能以 Block 为单位 每个 Page 大小一般为 2 KB 到 16 KB，这意味着使用 SSD 时，哪怕读或写 1 Byte 的数据，SSD 依旧会访问整个 Page。</description></item><item><title>什么是真正的编程能力</title><link>https://blog.joway.io/posts/what-is-the-programming-ability/</link><pubDate>Tue, 11 Jun 2019 00:00:00 +0000</pubDate><guid>https://blog.joway.io/posts/what-is-the-programming-ability/</guid><description>四年前在知乎提过一个问题，「什么是真正的编程能力」，当时这个问题获得了许多业内前辈的热诚回答。时过境迁，前段时间和朋友谈起最初使用知乎的经历，这才又想起当年年少无知提的这个问题，多年以后去一一回顾当时大家的回答，对每句话都有了更为深刻的理解和感触。
+如果我在今天去回答四年前自己提出的问题，我会如回答里的诸多其他工程师一样，将编程能力定义为「解决问题的能力」。在不同职业阶段对这话的理解可能会大有不同。在四年前，我会认为这句话的意思是「通过熟练且优异的编程技巧进行解决问题的能力」，着重点依旧在编程本身。但如今我却「背叛」了编程，或者说我所认为的编程能力不应当局限于「狭义的编程」本身。
+如果我们抛开这些年上层编程技术日新月异的发展，从编程的本质来看，编程的实质无非是用一套形式化语言去定义问题和描述解决问题的步骤。一个文学作家亦可以用自然语言实现他自己的编程工作，只不过最终的编译器和运行环境是人类的大脑 —— 过去几千年的数学家就是如此工作，并在自然语言基础上发明了更清晰严格的数学形式语言。计算机编程较之人脑的优越性在于更为可靠和高效的运行环境，使得数学得以脱离人类大脑的局限，完成更为复杂的工作。
+然而现实生活远比数学家想象的世界要复杂的多，现实问题在被形式化成为计算机语言前，往往要先经过人类使用自然语言进行反复沟通和辩论的过程，最终才会达成一致并被批准以落实成计算机语言。甚至于事实上相当一部分工作在自然语言阶段就足以被妥善解决，完全没有使用计算机的必要。许多人最初认为的编程能力，仅限于最后一步把自然语言的需求翻译成计算机语言而已，但事实上，一个只了解计算机语言编程的人或许是个不错的 Coder，但很难被称之为是一个合格的工程师，也不可能开发出伟大的 Software。
+如果一个工程师在编程活动中被一个他所不熟悉的语言所编写的软件所阻挡，最工程师的方法自然是学会这门语言然后解决这个软件的问题。以此类推当一个工程师在现实生活中被一群完全与他处于不同话语体系和思维体系的人所阻挡，最工程师的方法同样是学会他们的语言，使用他们的方式去描述问题、解决问题。
+语言亦或思想都是编程的工具，而编程又是为解决问题而创造的工具。我们经常看到一些多年某门计算机语言的从业者对于计算机的认知被牢牢锁死在这门语言框定的世界里，与之相似的是有更大一部分人对于世界的认知被锁死在计算机语言所框定的世界里。这既是从业者的悲哀也是计算机科学的悲哀。
+以上所述，如果要我将「解决问题的能力」展开成一个更为清晰的定义，我会认为，真正的编程能力是能够在这个复杂的世界里，针对不同语言体系的人理解并使用不同的描述形式，编写出一个用以清晰界定问题并描述出解决方法的「程序」的能力。
+希望再过四年我再来回顾这个问题时，能够有更为别致的感受。</description></item><item><title>命令行里的设计艺术</title><link>https://blog.joway.io/posts/the-art-of-cli-design/</link><pubDate>Fri, 11 Jan 2019 00:00:00 +0000</pubDate><guid>https://blog.joway.io/posts/the-art-of-cli-design/</guid><description>在谈论手机 App 或是网页时，我们总会谈到交互设计，但倘若涉及到面向专业用户的 CLI(Command-line interface)领域，很少有人会将它与用户交互相联系。甚至在很多人的大脑里，已经把 CLI 和「难用」画上了等号，更有甚者认为 CLI 的难用才体现了其 「专业性」。
+与此同时，「RTFM」(Read The Fucking Manual) 作为一个梗在工程师群体广泛流传，也让许多作者对于其不好用的 CLI 有了一个天然的借口。
+虽然我们都知道阅读文档是一个好习惯，但恐怕大部分人在用一个新命令前都不会去仔细阅读完它的文档手册，就算你今天读了，你不可能永远记得，也不可能每次记忆模凌两可的时候都去重读一遍。所以可想而知一个高度依赖文档用户才能够正常使用的 CLI 不是一个合格的 CLI。
+以下是我对于命令行设计的一些个人观点与观察，所涉并不一定广泛和正确，仅作为抛砖引玉，也欢迎在评论里提出你的看法。
+遵循约定俗成 例如 mv, cp, ln 这些命令都遵循 [action] [source_file] [target_file] 的格式，这不一定很有逻辑，但既然都已经约定俗成了，如果你违犯这个顺序要倒过来，其实是一件蛮缺德的事情。为什么说「缺德」？因为一个用过了你的命令的人，他很容易开始怀疑是不是还有别的命令行打破了这个约定，他会对其它命令也不放心，最后他甚至会忘了真正被广泛采用的约定用法是什么了，导致每次用类似语法的命令都胆颤心惊，这点我深有体会 😔。
+所以如果你的命令有类似的约定俗成可以遵守，你应该遵守业内的这种约定，这是一种职业道德。
+一致的命令组织结构 对所有和用户打交道的产品来说，「一致性」是天条。我遇到过两种被广泛采用的组织风格:
+$ [cmd] [module] [flags] [args] $ [cmd] [action] [flags] [args] 无论是按模块划分还是按行为划分本质思路其实都是一样的，有些人会认为项目大了会难以遵守这套规范，但即便是目前规模已经非常庞大的 kubectl，它依旧坚持以 [cmd] [action] [flags] [args] 为基础的设计准则。在有些较为复杂的地方，它可以用 subcmd 来进一步向外部隐藏复杂性 [cmd] [subcmd] [action] [flags] [args]，例如：
+$ kubectl config [action] [flags] [args] 我几乎每天都会用到 kubectl，但我的确很少去看它的文档，甚至我都想不到我是怎么就会使用它的。越是在复杂的项目面前，这种一致性带来的好处越明显。
+而一个典型的反面教材是 Git。它是我用过的最复杂同时又是最混乱的 CLI，以一般人最常用的分支操作举例：</description></item><item><title>Make Smartphone Smart Again</title><link>https://blog.joway.io/posts/make-smartphone-smart-again/</link><pubDate>Tue, 08 Jan 2019 00:00:00 +0000</pubDate><guid>https://blog.joway.io/posts/make-smartphone-smart-again/</guid><description>使用 Pixel 3 近一个月了，期间也带着它在外面玩了一周多时间，在国内外都积累了一些作为主力机的使用体验。
+我之前的设备是两年前买的 iPhone 7，虽然总体使用还算流畅，但这两年 iOS 生态基本没有什么变化，同时 iPhone 7 的电池电量已经需要我时刻开启省电模式才能过完一整天了。我不是没想过换 iPhone X，但我实在是反感它的刘海设计，所以不想考虑所有有刘海的手机。也正是由于这点，无论是在 iOS 还是 Android 阵营，我的选择其实都非常少。
+全面屏是否重要 全面屏出现的背景是如今手机的尺寸已经到达人类能够接受的极限，迫不得已只能最大化利用这有限的尺寸。全面屏的价值在于:
+单屏提供更多信息量 视觉美观 衡量全面屏是否重要，屏占比是否越大越好这两个问题，关键是看他们的是否体现了这两个价值。我觉得有以下两个问题是值得思考的:
+如果单屏已经足够呈现用户所需要的信息量了，是否还要继续追求屏占比？ 如果过度追求屏占比反而导致丧失了视觉美观这个价值，是否值得？ 如果我是一个手机的设计者，我的追求会是:
+找到一个足以提供足够信息量的合适屏幕尺寸 这上面这个尺寸基础上追求尽可能的视觉美观 我认为 5 吋的屏幕对我是一个足够大的展示日常软件的尺寸了，而且这个大小无论是对口袋还是手掌都恰到好处。
+另外我也认为刘海屏完完全全是一个没有视觉美感可言的东西。如果屏幕尺寸已经足够，我丝毫不认为有必要为了抢占那一点点的屏幕去设计一个刘海。
+基于这两点，5.5 吋的 Pixel 3 其实是一个恰到好处的设计。5.5 吋加上它比不高的屏占比，屏幕尺寸大概也就接近 5 吋左右。由于前置摄像头必须要有，但一个摄像头又有点浪费额头上那片争议颇多的黄金地段，所以就放了两个前置，可以用来拍摄广角。
+我必须承认当初拿到 Oppo Find X 的时候我是惊艳的，尤其是在晚上看那块全到极致的屏幕。我没有任何理由排斥这种极致的全面屏，但是目前技术的限制导致了这种全面是有高昂代价的。在全面屏上并不存在说有多大技术壁垒，无非是各个厂家的取舍策略不同而已。这种取舍策略背后是对手机的理解。Pixel 3 是目前最符合我对屏幕理解的手机。
+后置双摄是否重要 后置有多少个摄像头的价值在于能否拍到好的照片。如果你能够达到拍到好照片的目的，你没有摄像头都是可以接受的。所以在纠结在摄像头数量是毫无意义的。
+大部分人对拍照的诉求无非是：
+高分辨率 背景虚化 夜景能力 调色 除了调色其余的几点都是高度仰赖镜头本身能力的，所以我认为毫无疑问双摄是很有意义的。
+但 Google 的理念是，希望通过软件的方法把硬件的工作也做了。从技术上我是完全认同这一点的，因为的确具备技术可行性。但遗憾的是 Google 目前并没有在这点上做的很好。
+在「背景虚化」上，目前 Pixel 所模拟出来的算法虚化完全没有办法和光学虚化相比。但在「夜景能力」上，Pixel 的表现还是相当可以，原因也非常简单，进光量直接影响夜景照片的质量，而进光量要么靠快门光圈往上堆，要么就是多张照片合成。即便是在数码单反上，如果你没有三脚架也只能用多张照片合称的办法来堆夜景能力。所以在夜景上，Pixel 仰赖算法已经能够实现接近单反的水准了。至于「高分辨率」早已不是手机相机互相比较的点了，所以也没有太多可说的。</description></item><item><title>从程序到人 —— 情头配对助手的前世今生</title><link>https://blog.joway.io/posts/avatar-matcher/</link><pubDate>Thu, 27 Sep 2018 00:00:00 +0000</pubDate><guid>https://blog.joway.io/posts/avatar-matcher/</guid><description>&lt;h2 id="heading">背景&lt;/h2>
+&lt;p>情头(情侣头像)一般指成双成对的头像，可以是真人照片，也可以是卡通人物等图片。衍生出去还有闺密头像和基友头像等等。&lt;/p>
+&lt;p>&lt;img src="https://blog.joway.io/images/old-blog/1538015444.png?imageMogr2/thumbnail/!70p" alt="">&lt;/p>
+&lt;p>社交媒体上有一个非常令人费解的现象是，如果你去即刻、豆瓣、百度贴吧、微博，会发现有大量的人在上面贴了一个头像，然后寻找和它匹配的另一半头像，例如这样:&lt;/p>
+&lt;p>&lt;img src="https://blog.joway.io/images/old-blog/1538016090.png?imageMogr2/thumbnail/!70p" alt="">&lt;/p>
+&lt;p>市面上的情侣头像大多是一些社区里的大佬自己制作出来的，然后发到社区里，再慢慢流传开来。这种传播方式导致了很多情头在传播时候早就被拆散了。很多人可能只找到了其中一个，但是想要找到和它配对的另一半。&lt;/p>
+&lt;p>还有一个问题是，当你看到一个头像时，没有人能够确定这个头像是否在制作时候就有另外一半。&lt;/p>
+&lt;p>一些程序员朋友最早看到这个问题时，总会天真地想去搜索引擎里识图一下就行了。但这里有两个非常有趣的问题:&lt;/p>
+&lt;p>第一个是目前搜索引擎的识别图片能力其实并不强，比如以 All in AI 著称的百度:&lt;/p>
+&lt;p>&lt;img src="https://blog.joway.io/images/old-blog/1538016451.png?imageMogr2/thumbnail/!70p" alt="">&lt;/p>
+&lt;p>这还是在图片是原图的情况下，经常一些小朋友会在情头上自己二次创作，比如裁剪，比如压缩，比如贴上什么爱心。那样基本上识图就废了。&lt;/p>
+&lt;p>第二个问题更加有趣，情头的特点就是大家都在用，所以在最理想的情况下，即便搜索引擎能够识别出所有有这个头像的网站，出来的结果也并没有什么用处，无非是找到了也在用这个头像的别的网站的用户。&lt;/p>
+&lt;p>&lt;img src="https://blog.joway.io/images/old-blog/1538016570.png?imageMogr2/thumbnail/!70p" alt="">&lt;/p>
+&lt;p>只有一种情况是真正能够帮助到寻找情侣头像这件事情的，那就是搜索引擎出来的结果里是专门搜集匹配好的情头的站点。那样姑且用户还能点进网页里去找到另外一半。&lt;/p>
+&lt;p>从上述阐述里不难发现，指望一个未成年小女生使用一系列高级互联网骚操作找一个头像是有多么不现实，何况技术上可行性还很低。&lt;/p></description></item><item><title>即刻多端实时通信实践</title><link>https://blog.joway.io/posts/socket-io/</link><pubDate>Tue, 18 Sep 2018 00:00:00 +0000</pubDate><guid>https://blog.joway.io/posts/socket-io/</guid><description>背景 jike-io 是即刻基于 socket.io 构建的一个实时通信基础设施。目前客户端上的所有实时通信服务都是建立在其基础上，涵盖了私信、消息通知、用户反馈、活动页小游戏等诸多组件。
+在目前即刻的实时通信设计里，我们的实时通信只是为了让服务端主动推送消息给客户端，客户端不会主动通过 websocket 发送消息。由于几乎我们所有需要发送消息的请求都会有一定业务逻辑在，而这个业务逻辑我们并不希望 websocket 连接层(jike-io)去处理，所以我们仍旧采用传统 HTTP 请求的方式去发送请求。至于之后是否需要推送消息给用户，由服务端调用 jike-io 的接口进行实现。
+在客户端层面，每一个在线用户都会向服务端建立一个 websocekt 连接，后端会为每一个用户建立一个单独的 room 。所有需要通知到该用户的消息都会使用该 websocket 连接进行推送。这种设计相较于针对不同场景建立不同的room的方案，带来的好处是无论需求如何变化，我们的 room 数目永远是和在线用户数一致了，避免个别复杂需求导致 room 数目暴涨。而具体消息类型我们通过自己定义数据格式来进行鉴别。
+我们的整套方案是完全依赖于 socket.io 的，期间也遇到了不少大大小小的坑。有些其实是我们自己的场景与其设计初衷不是非常吻合导致的，还有一些算是它的设计缺陷。
+在讨论上述问题之前，我们需要去弄明白的一个事情是，socket.io 到底背后做了哪些事情。
+socket.io 的设计与实现细节 socket.io 是什么 socket.io 是一个非常流行的实时通信框架, 在 Github 上已经积累了 43574 个 star 。它在开源软件里可以算是一个非常产品化了的软件。拥有相对良好的生态，对于许多功能的封装也很体贴，从移动端到 Web 再到服务端都有比较完整的实现。
+socket.io 并不等同于 websocket 框架，它在运行平台不支持 websocket 的时候能够自动回退到 long poll 的方式建立实时通信。同时也实现了断线重连机制。还封装了一套 namespace &amp;amp;&amp;amp; room 的代码层概念。在分布式方面，socket.io 支持多种 adapter 作为 backend 。话虽这么说，但目前看上去可以用的且被人广泛使用的也只有 redis 作为 backend 的 adapter 。所以以下讨论建立在 socket.io-redis 基础之上。</description></item><item><title>使用 Surge 提升多网络环境下的流畅开发体验</title><link>https://blog.joway.io/posts/surge-network/</link><pubDate>Tue, 03 Jul 2018 00:00:00 +0000</pubDate><guid>https://blog.joway.io/posts/surge-network/</guid><description>作为一名后端工程师经常需要在各种网络环境中切换，由于网络拓扑本身的复杂性以及一些网络工具之间的冲突和bug，常常会在切换中造成不必要的麻烦和痛苦。通常很容易在工作中听到同事会问这些问题 :
+你有开 vpn 吗 ? 你开了 ss 了吗 ? 你有同时开 ss 和 vpn 吗 ? 你 http 代理是不是被顶掉了 ? 如果同是技术同事间交流那可能还容易，如果是技术和非技术间交流网络情况，那简直是一个灾难。
+而事实上，在绝大部份时候，我们对于网络拓扑的需求是可被精确描述的，也就是说理想情况下不应当存在一个我为了访问某个服务而手动选择要进入某个网络环境的事情。
+这篇文章会介绍我们在构建复杂网络环境中的良好开发体验时踩过的坑以及最终是如何优雅地解决这个问题的过程。
+历史方案演变 常见的网络环境有:
+正常大陆网络 能够上国外网站的网络 公司内网 各个服务器集群的内网 如果你自己还折腾了一些服务器或者家庭网络，那可能还会更加复杂。
+之前摸索出的一套还算比较方便的解决方案是 :
+在本地常驻一个 ss client 并开放 http 代理端口 在浏览器上使用 Proxy SwitchyOmega 使 Chrome 都走 ss client 的 http 代理 开一个 openvpn 连接到服务器内部网络 这种配置方式能够使得我既能连接所有服务器线上服务和数据库，也能自由地用浏览器去 Google 查一些资料。缺点是丢失了办公室原本的网络环境，另外如果你们服务器有两个完全隔离的子网，那么你可能需要同时连两个 vpn 。而且还有一个不好的是，你的所有非线上服务访问都经过了线上vpn机器的一层代理，让你的访问速度变慢了不说，对服务器也不是一个好事。此外，如果你的一些软件无法手动配置代理，那他们只能默认走 vpn 的网络，对于一些需要访问国外服务器的软件来说就麻烦了。
+基于以上缺点，我们又迭代出了另外一个方案:
+在服务器上安装一个 ss server 在本地常驻两个 ss client ，一个指向生产服务器 ss, 一个指向国外 ss , 并开放 socks5 代理端口 使用 Proxifier 代理所有本机连接并指定一些规则选择直接访问还是转发到本地的两个 ss client 上。例如我选择让所有 10.</description></item><item><title>一份其实好吃的 LaTeX 入门餐</title><link>https://blog.joway.io/posts/latex/</link><pubDate>Sun, 13 May 2018 00:00:00 +0000</pubDate><guid>https://blog.joway.io/posts/latex/</guid><description>最近在使用 LaTeX 写作，发现虽然这个「软件」使用简单，设计简约，但使用起来却并不是非常的容易，加上其生态非常芜杂，各种宏包和发行版层出不穷，中文世界鲜有文章系统地去讲他们之间的关系。这篇文章不会去介绍其基本用法，而是以一个更为宏观的角度，旨在厘清 TeX 排版系统的来龙去脉，以及其生态圈中各个项目的作用与关系。或有纰漏，还望雅正。
+标题致敬 Liam Huang 老师很流行的一篇文章 《一份其实很短的 LaTeX 入门文档》 。
+什么是 Tex TeX 是高德纳教授在70年代末编写 The Art of Computer Programming 时，对当时的计算机排版技术感到无法忍受，因而决定自己开发一个高质量的计算机排版系统 TeX 。
+TeX 的版本号有别于当下流行的 x.x.x，而是以圆周率 π 的形式。当前的版本号是 3.14159265 ，所以下一个版本是 3.141592653 。最终无限收敛到 π ，代表了 TeX 不断追求完美的理想。而事实上 TeX 也的确堪称「完美」，高德纳甚至曾悬赏任何发现 Bug 的人，每一个漏洞的奖励金额从2.56美元开始，之后每发现一个 Bug 都会翻倍，直至327.68美元封顶。
+TeX 的输出文件被称为 DVI(Device Independent) 文件，DVI 可以作为一种界面描述的中间格式，通过它可以再进而转换成 PDF 格式。
+为了区分概念，我们应当将高德纳写的 TeX 软件分为 TeX 语法 和 TeX 编译器。虽然高德纳自己写了一个 TeX 编译器，但其它人依旧可以在不同平台自己编程实现 TeX 语法的编译器。为了保持语法的稳定，TeX 有一组严格的测试文件，如果测试文件文件的输出结果不同于预定的结果，那么这个排版系统就不能够被称为「TeX」。这些不同的 TeX 编译器我们都称之为 「 TeX 引擎」。</description></item><item><title>Kafka 的设计与实践思考</title><link>https://blog.joway.io/posts/kafka-design-practice/</link><pubDate>Mon, 16 Apr 2018 00:00:00 +0000</pubDate><guid>https://blog.joway.io/posts/kafka-design-practice/</guid><description>前几天看了 librdkafka 的官方文档，这篇文档不仅仅讲解了如何使用 Kafka ，某种程度也讲解了分布式系统实现的难点和使用细节，故而让我对 Kafka 的实现原理产生了浓厚的兴趣。
+这篇文章从 Kafka 的设计到使用做了一些个人总结，围绕真正实践场景，探寻其设计上的智慧与妥协。
+设计 架构设计 Zookeeper Zookeeper 存储了 Kafka 集群状态信息 。
+Zookeeper 还负责从 Broker 中选举出一个机器作为 Controller, 并确保其唯一性。 同时, 当 Controller 宕机时, 再选举一个新的 。
+在 0.9 版本之前，它还存储着 Consumer 的 offset 信息 。
+Broker 接收 Producer 和 Consumer 的请求，并把 Message 持久化到本地磁盘。
+集群会经由 ZK 选举出一个 Broker 来担任 Controller，负责处理各个 Partition 的 Leader 选举，协调 Partition 迁移等工作。
+内部组件设计 Topic 逻辑概念，一个 Topic 的数据会被划分到一个或多个 Partition 中。
+Partition 最小分配单位。一个 Partition 对应一个目录，该目录可以被单独挂在到一个磁盘上，以实现IO压力的负载均衡。同时多个 Partition 分布在多台机器上，也实现了灵活地水平扩容。</description></item><item><title>Lemon : Koa 风格的 Python 异步 Web 框架</title><link>https://blog.joway.io/posts/lemon-overview/</link><pubDate>Mon, 08 Jan 2018 00:00:00 +0000</pubDate><guid>https://blog.joway.io/posts/lemon-overview/</guid><description>前段时间想要写一些简短高效的 API ，背后的工作无非就是一些计算和数据处理，但是可能并发量会比较高。当我在 Python 的生态里去搜寻一些靠谱的 Web 框架时，很难找到一个设计优秀且运行效率高的框架。尤其是当我已经习惯了 NodeJS 的 Koa 那种简洁明了的设计时，很难再喜欢上像 Flask 那种装饰器的写法和各种概念拢杂在一起的设计。最后实在没有办法，就自己写了个符合我个人审美的框架 Lemon 。
+什么是 Web 框架 在讲 Lemon 的设计前，我们先来看一看一个请求是如何被响应的 ，以及框架在其中的作用是什么 :
+当一个请求从客户端进入服务器，首先以 TCP 包的形式被接收到，这个时候我们需要手动去建立连接，接收到 TCP 报文后我们需要去判断它的协议，然后再解成相应协议(一般都是HTTP协议)的报文，传给 application 去处理，当处理完后还要把结果写回成 TCP 报文传回去，如果有 keep alive 还需要去手动管理这个连接的生命周期。以上这些统称为 server 部分。
+而和开发者关系最密切的 application 部分做的就是拿到一个 http 或其它协议的报文，然后根据其信息做针对性的响应，传给 server 。
+无论你是使用任何语言任何框架，都逃不开上面这个处理过程。而我们在比较框架的时候，无外乎是对以下几个方面做一些针对性的优化:
+TCP报文解析成 HTTP(或其它协议) 报文的效率 并发策略 (多线程，多进程，协程，线程池，Event Loop) application 本身的运行效率 (由框架的效率，所用的语言和使用者自身的代码质量共同决定) 对于第一点，python有一个叫 httptools 的库就是使用了 NodeJS 的 http parser 以达到高性能解包的目的。
+针对第二点，有许多OS层面和工程层面的技术在致力于解决这个问题。uvloop 就是其中的一种，采用事件循环的方式，底层用的是 libuv , 同样也是 NodeJS 的底层异步IO库 。</description></item><item><title>Golang : Make Programming Happy Again</title><link>https://blog.joway.io/posts/golang-talk/</link><pubDate>Sat, 30 Dec 2017 00:00:00 +0000</pubDate><guid>https://blog.joway.io/posts/golang-talk/</guid><description>之前在公司内部做技术分享写的一个关于 Golang 的 slide ，花费了挺多的时间的，所以就脱敏了发出来。个人觉得值得一看 ，至少 PPT 的设计很不错 :) 。
+Google Doc 地址 :
+https://docs.google.com/presentation/d/1odpCfHE5dp7acgK_7lkqTPgHlvT-jPg-XtM7-s9WQZw/edit?usp=sharing</description></item><item><title>Kubernetes 中使用 API Gateway 替代 Ingress</title><link>https://blog.joway.io/posts/kubernetes-gateway/</link><pubDate>Tue, 12 Sep 2017 00:00:00 +0000</pubDate><guid>https://blog.joway.io/posts/kubernetes-gateway/</guid><description>背景 最近在构思基于 Kubernetes 建立一个个人的开放云平台 , 听起来有点不自量力 , 不过作为个人业余小玩意还是蛮好玩的。最终的成品希望是用户能够轻松地在平台上跑一些简单的无状态服务 和 cronjob 。
+在搭建平台的时候遇到的第一个困难是需要有一个好用且功能全面的 API Gateway , 主流的网关服务大多是基于 OpenResty 基础上进行二次开发 , 所需要完成的工作无非是负载均衡，和 API 管理, 加上一些零零碎碎的小功能。
+负载均衡 负载均衡分为四层和七层两种 , 以大家所熟知的 Nginx 为例 , 在它的 conf 文件中 , 有 http {} 和 stream {} 两种 block 。
+# 四层负载均衡 stream { server { listen 80; proxy_pass app; } upstream app { server 172.31.0.1:8000; } } # 七层负载均衡 http { upstream app { server 192.168.0.1:8000; server 192.</description></item><item><title>ElasticSearch 最佳实践</title><link>https://blog.joway.io/posts/elasticsearch-bp/</link><pubDate>Sun, 28 May 2017 00:00:00 +0000</pubDate><guid>https://blog.joway.io/posts/elasticsearch-bp/</guid><description>Elasticsearch 是一个需要不停调参数的庞然大物 , 从其自身的设置到JVM层面, 有着无数的参数需要根据业务的变化进行调整。最近采用3台 AWS r3.2xlarge , 32GB, 4核, 构建了一套日均日志量过亿的 EFK 套件。经过不停地查阅文档进行调整优化 , 目前日常CPU占用只在30% , 大部分 Kibana 内的查询都能在 5s ~ 15s 内完成。
+下面记录了一些实践过程中积累的经验。
+硬件 CPU 多核胜过高性能单核CPU 实践中发现, 在高写入低查询的场景下, 日常状态时 , CPU 还能基本应付, 一旦进行 kibana 上的查询或者 force merge 时, CPU 会瞬间飙高, 从而导致写入变慢, 需要很长一段时间 cpu 才能降下来。 Mem Elasticsearch 需要使用大量的堆内存, 而 Lucene 则需要消耗大量非堆内存 (off-heap)。推荐给 ES 设置本机内存的一半, 如32G 内存的机器上, 设置 -Xmx16g -Xms16g ，剩下的内存给 Lucene 。 如果你不需要对分词字符串做聚合计算（例如，不需要 fielddata ）可以考虑降低堆内存。堆内存越小，Elasticsearch（更快的 GC）和 Lucene（更多的内存用于缓存）的性能越好。 由于 JVM 的一些机制 , 内存并不是越大越好, 推荐最大只设置到 31 GB 。 禁用 swap sudo swapoff -a 配置 PS: 应该尽可能使用 ansible 这类工具去管理集群 , 否则集群内机器的状态不一致将是一场噩梦。</description></item></channel></rss>
