@@ -1,4 +1,18 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Joway's Blog</title><link>https://blog.joway.io/</link><description>Recent content on Joway's Blog</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Fri, 30 Aug 2019 20:33:03 +0800</lastBuildDate><atom:link href="https://blog.joway.io/index.xml" rel="self" type="application/rss+xml"/><item><title>创业公司的文化</title><link>https://blog.joway.io/posts/startup-culture/</link><pubDate>Mon, 02 Mar 2020 00:00:00 +0000</pubDate><guid>https://blog.joway.io/posts/startup-culture/</guid><description>前段时间有一个小事情让我想到创业公司文化这件事情。
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Joway's Blog</title><link>https://blog.joway.io/</link><description>Recent content on Joway's Blog</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Fri, 30 Aug 2019 20:33:03 +0800</lastBuildDate><atom:link href="https://blog.joway.io/index.xml" rel="self" type="application/rss+xml"/><item><title>从动物森友会聊主机游戏联机原理</title><link>https://blog.joway.io/posts/how-animal-crossing-online-work/</link><pubDate>Wed, 13 May 2020 00:00:00 +0000</pubDate><guid>https://blog.joway.io/posts/how-animal-crossing-online-work/</guid><description>最近在玩动物森友会的时候时常会遇到一些迷之联机问题，在网上一番搜索，发现大家的答案都趋于用玄学来解释，于是便有了兴致想在原理上搞懂这些问题，顺便探究动森这款游戏的联机设定背后有哪些技术上的原因。
+事先说明，我并不从事游戏行业，也不是长期的主机玩家，如有纰漏或其他补充，欢迎在评论里告知。
+游戏是如何同步的 我们首先先来看看游戏是如何同步的。
+想象两个独立房间里分别有甲、乙两个玩家，他们要远程下一局象棋。他们每下一步前都需要先获知到当前棋盘的情况，这时便可以有两种实现方式。
+第一种业界叫做锁步同步，原理是每个玩家操作一步时，就通知给另外一个玩家，彼此同步当前的所有操作序列，通过这些有时间顺序的操作，就能够计算出当前的棋局状态。但它不允许中间丢失任何一步的信息，否则就会出现非常大的计算偏差。
+第二种叫做状态同步，顾名思义是玩家每操作一步，就同步整个棋盘的状态。这种方式可以容忍中间某些状态丢失，最终得到的状态依旧还是一致的。
+在实际实践中，针对那种玩家操作非常高频的游戏会更多使用锁步同步，例如王者荣耀。而对于那些卡牌类游戏更偏向于直接用状态同步。当然也会有两种方式组合使用的情况。
+游戏是如何联机的 通信架构 无论是上面哪种同步方式，我们都需要通过网络在多个主机间交换数据。为方便论述，我们现在转换成甲、乙、丙三个人一起下跳棋。为保证三个人最终得到的游戏状态都是一致的，我们往往需要有一台 Host 主机来作为权威主机，其他主机只能通过权威主机下发的命令(状态/操作序列)来更新自己的游戏数据。
+在这里我们假设是甲来做「Host」。乙、丙每操作一步，都需要先发送给甲确认，无误后再发送该操作被确认的信息给乙、丙，乙、丙此时才能够认为操作成功并将画面更新到最新的状态。甲主机上在任意时刻都存有当前游戏的真正状态，其他主机只是在 follow 甲主机的状态更新自己的画面。
+在上述模式下，由于甲主机既要作为游戏主机，又要作为状态同步的主机，当联机用户数一多，甲主机就会不堪重负，出现所谓的「炸机/炸岛」现象。另外，这种模式会需要甲主机一直存活，只能作为短时间内的伺服方案。所以有些游戏会引入一个外部自建/官方的服务器来承担这个状态同步的功能，例如我的世界。但其原理依旧是一样的。
+NAT 穿透 在了解完上面的基础知识后，我们能够发现，在不考虑外部服务器的情况下，我们会对玩家主机间的网络有以下几点要求：
+甲能够向乙、丙发送数据 乙、丙能够向甲发送数据 乙、丙之间不需要有网络联通保障 虽然上述要求看起来很容易，但是由于现在网络运营商都会不同程度地使用 NAT 技术，所以导致要让两台家用主机建立双向通信并不是一件非常容易的事情。
+家用网络一般有四种不同的 NAT 类型：
+Full-cone NAT：
+Once an internal address (iAddr:iPort) is mapped to an external address (eAddr:ePort), any packets from iAddr:iPort are sent through eAddr:ePort. Any external host can send packets to iAddr:iPort by sending packets to eAddr:ePort. (Address)-restricted-cone NAT：</description></item><item><title>创业公司的文化</title><link>https://blog.joway.io/posts/startup-culture/</link><pubDate>Mon, 02 Mar 2020 00:00:00 +0000</pubDate><guid>https://blog.joway.io/posts/startup-culture/</guid><description>前段时间有一个小事情让我想到创业公司文化这件事情。
 我目前就职在一家创业公司，我们有一个文化是有相当一部分同事会有一个「艺名」。艺名的产生有很多种场景。一种类似古代的「字」，是自己为摆脱原始名字的依赖，为自己取的代称，有着很强个人色彩，比如我的 Joway。还有一种是在公司发展过程中自然而然形成的「外号」，比如中国公司常见的X哥，通常还带着点共同记忆在里面。
 但这种遍布的艺名也为团队协作带来了一定困扰，比如在 Slack 搜索/@一个同事的时候，需要一个个遍历所有可能的名字，更麻烦的是有时候你还不一定知道他的艺名。于是乎，很自然能够想到的一个做法是强制规范每个人的命名，比如只能用真实姓名。的确会有大公司过来的同事会这么建议，这种建议也能以最快的速度和最好的结果来解决这个问题。但在这个过程中牺牲的，其实是这些艺名长期以来养成的共同感情，以及沟通中的人味。
 至于这件事情最终如何解决的其实倒也并不重要了，但观察这个解决过程其实蛮有意思的。因为这种现象背后展现的其实是一家创业公司在发展过程中，集聚了不同公司文化背景的人以后互相交融影响的过程。
