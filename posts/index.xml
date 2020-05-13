@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on Joway's Blog</title><link>https://blog.joway.io/posts/</link><description>Recent content in Posts on Joway's Blog</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Wed, 13 May 2020 00:00:00 +0000</lastBuildDate><atom:link href="https://blog.joway.io/posts/index.xml" rel="self" type="application/rss+xml"/><item><title>从动物森友会聊主机游戏联机原理</title><link>https://blog.joway.io/posts/how-animal-crossing-online-work/</link><pubDate>Wed, 13 May 2020 00:00:00 +0000</pubDate><guid>https://blog.joway.io/posts/how-animal-crossing-online-work/</guid><description>最近在玩动物森友会的时候时常会遇到一些迷之联机问题，在网上一番搜索，发现大家的答案都趋于用玄学来解释，于是便有了兴致想在原理上搞懂这些问题，顺便探究动森这款游戏的联机设定背后有哪些技术上的原因。
-游戏是如何同步的 我们首先先来看看游戏是如何同步的。
+游戏是如何同步的 我们首先先来看看一般游戏是如何来做同步的。
 想象两个独立房间里分别有甲、乙两个玩家，他们要远程下一局象棋。他们每下一步前都需要先获知到当前棋盘的情况，这时便可以有两种实现方式。
 第一种业界叫做锁步同步，原理是每个玩家操作一步时，就通知给另外一个玩家，彼此同步当前的所有操作序列，通过这些有时间顺序的操作，就能够计算出当前的棋局状态。但它不允许中间丢失任何一步的信息，否则就会出现非常大的计算偏差。
 第二种叫做状态同步，顾名思义是玩家每操作一步，就同步整个棋盘的状态。这种方式可以容忍中间某些状态丢失，最终得到的状态依旧还是一致的。
