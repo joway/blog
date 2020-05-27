@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>技术 on Joway's Blog</title><link>https://blog.joway.io/categories/%E6%8A%80%E6%9C%AF/</link><description>Recent content in 技术 on Joway's Blog</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Wed, 13 May 2020 00:00:00 +0000</lastBuildDate><atom:link href="https://blog.joway.io/categories/%E6%8A%80%E6%9C%AF/index.xml" rel="self" type="application/rss+xml"/><item><title>从动物森友会聊主机游戏联机机制</title><link>https://blog.joway.io/posts/how-animal-crossing-online-work/</link><pubDate>Wed, 13 May 2020 00:00:00 +0000</pubDate><guid>https://blog.joway.io/posts/how-animal-crossing-online-work/</guid><description>最近在玩动物森友会的时候时常会遇到一些迷之联机问题，在网上一番搜索，发现大家的答案都趋于用玄学来解释，于是便有了兴致想在原理上搞懂这些问题产生的根源以及动森这款游戏的一些联机设定背后的技术原因。
-事先声明的一点是，本人并不从事游戏行业亦非主机游戏长期玩家，如有纰漏或其他角度的补充，欢迎在评论区告知。
+事先声明，本人并不从事游戏行业亦非主机游戏长期玩家，如有纰漏或其他角度的补充，欢迎在评论区告知。
 游戏是如何同步的 我们首先来看看一般游戏是如何来做同步的。
 想象两个独立房间里分别有甲、乙两个玩家，他们要远程下一局象棋。他们每下一步前都需要先获知到当前棋盘的情况，此时能够有两种实现方式。
 第一种叫做锁步同步，原理是玩家每操作一步就通知给另外一个玩家，彼此同步当前的操作序列，通过这些有时序的操作，就能够计算出当前棋局的状态。但它不允许中间丢失任何一步的信息，否则就会出现非常大的计算偏差。
