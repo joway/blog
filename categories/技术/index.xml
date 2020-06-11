@@ -1,4 +1,12 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>技术 on Joway's Blog</title><link>https://blog.joway.io/categories/%E6%8A%80%E6%9C%AF/</link><description>Recent content in 技术 on Joway's Blog</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Wed, 13 May 2020 00:00:00 +0000</lastBuildDate><atom:link href="https://blog.joway.io/categories/%E6%8A%80%E6%9C%AF/index.xml" rel="self" type="application/rss+xml"/><item><title>从动物森友会聊主机游戏联机机制</title><link>https://blog.joway.io/posts/how-animal-crossing-online-work/</link><pubDate>Wed, 13 May 2020 00:00:00 +0000</pubDate><guid>https://blog.joway.io/posts/how-animal-crossing-online-work/</guid><description>最近在玩动物森友会的时候时常会遇到一些迷之联机问题，在网上一番搜索，发现大家的答案都趋于用玄学来解释，于是便有了兴致想在原理上搞懂这些问题产生的根源以及动森这款游戏的一些联机设定背后的技术原因。
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>技术 on Joway's Blog</title><link>https://blog.joway.io/categories/%E6%8A%80%E6%9C%AF/</link><description>Recent content in 技术 on Joway's Blog</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Thu, 04 Jun 2020 00:00:00 +0000</lastBuildDate><atom:link href="https://blog.joway.io/categories/%E6%8A%80%E6%9C%AF/index.xml" rel="self" type="application/rss+xml"/><item><title>分布式文件系统的演化</title><link>https://blog.joway.io/posts/deep-into-distributed-filesystem/</link><pubDate>Thu, 04 Jun 2020 00:00:00 +0000</pubDate><guid>https://blog.joway.io/posts/deep-into-distributed-filesystem/</guid><description>分布式文件系统演化 文件系统是操作系统 IO 栈里非常重要的一个中间层，其存在的意义是为了让上层应用程序有一层更加符合人类直觉的抽象来进行文档的读写，而无需考虑底层存储上的细节。
+本地文件系统 在讨论分布式文件系统前，我们先来回顾下本地文件系统的组成。
+存储结构 在前面一张图里，我们能够看到文件系统直接和通用块层进行交互，无论底层存储介质是磁盘还是SSD，都被该层抽象为 Block 的概念。文件系统在初始化时，会先在挂载的块存储上的第一个位置创建一个 Super Block：
+上图右边部分就是一块完整的存储，可以将其想象成一个数组。
+Super Block 中存储了该文件系统的信息，其组成部分如下：
+Magic: MAGIC_NUMBER or 0xf0f03410 ，用来告诉操作系统该磁盘是否已经拥有了一个有效的文件系统。 Blocks: blocks 总数 InodeBlocks: 其中属于 inode 的 block 数 Inodes: 在 InodeBlocks 中存在多少个 inodes 由于这里的 Blocks 总数、InodeBlocks 总数、每个 Block 的大小在文件系统创建时就已经固定，所以一般来说一个文件系统能够创建的文件数量在一开始就已经固定了。
+Linux 中每个文件都拥有一个唯一的 Inode，其结构如下：
+inode 上半部分的 meta data 很容易理解，下半部分的 block 指针的含义分别为：
+direct block pointer: 直接指向 data block 的地址 indirect block: 指向 direct block double indirect block: 指向 indirect block triple indirect block: 指向 double indirect block 由于一个 inode 大小固定，所以这里的 block pointers 数量也是固定的，进而单个文件能够占用的 data block 大小也是固定的，所以一般文件系统都会存在最大支持的文件大小。</description></item><item><title>从动物森友会聊主机游戏联机机制</title><link>https://blog.joway.io/posts/how-animal-crossing-online-work/</link><pubDate>Wed, 13 May 2020 00:00:00 +0000</pubDate><guid>https://blog.joway.io/posts/how-animal-crossing-online-work/</guid><description>最近在玩动物森友会的时候时常会遇到一些迷之联机问题，在网上一番搜索，发现大家的答案都趋于用玄学来解释，于是便有了兴致想在原理上搞懂这些问题产生的根源以及动森这款游戏的一些联机设定背后的技术原因。
 事先声明，本人并不从事游戏行业亦非主机游戏长期玩家，如有纰漏或其他角度的补充，欢迎在评论区告知。
 游戏是如何同步的 我们首先来看看一般游戏是如何来做同步的。
 想象两个独立房间里分别有甲、乙两个玩家，他们要远程下一局象棋。他们每下一步前都需要先获知到当前棋盘的情况，此时能够有两种实现方式。
@@ -54,20 +62,7 @@ SLC：每个单元 1 比特 MLC：每个单元 2 比特 TLC：每个单元 3 比
 一致的命令组织结构 对所有和用户打交道的产品来说，「一致性」是天条。我遇到过两种被广泛采用的组织风格:
 $ [cmd] [module] [flags] [args] $ [cmd] [action] [flags] [args] 无论是按模块划分还是按行为划分本质思路其实都是一样的，有些人会认为项目大了会难以遵守这套规范，但即便是目前规模已经非常庞大的 kubectl，它依旧坚持以 [cmd] [action] [flags] [args] 为基础的设计准则。在有些较为复杂的地方，它可以用 subcmd 来进一步向外部隐藏复杂性 [cmd] [subcmd] [action] [flags] [args]，例如：
 $ kubectl config [action] [flags] [args] 我几乎每天都会用到 kubectl，但我的确很少去看它的文档，甚至我都想不到我是怎么就会使用它的。越是在复杂的项目面前，这种一致性带来的好处越明显。
-而一个典型的反面教材是 Git。它是我用过的最复杂同时又是最混乱的 CLI，以一般人最常用的分支操作举例：</description></item><item><title>Make Smartphone Smart Again</title><link>https://blog.joway.io/posts/make-smartphone-smart-again/</link><pubDate>Tue, 08 Jan 2019 00:00:00 +0000</pubDate><guid>https://blog.joway.io/posts/make-smartphone-smart-again/</guid><description>使用 Pixel 3 近一个月了，期间也带着它在外面玩了一周多时间，在国内外都积累了一些作为主力机的使用体验。
-我之前的设备是两年前买的 iPhone 7，虽然总体使用还算流畅，但这两年 iOS 生态基本没有什么变化，同时 iPhone 7 的电池电量已经需要我时刻开启省电模式才能过完一整天了。我不是没想过换 iPhone X，但我实在是反感它的刘海设计，所以不想考虑所有有刘海的手机。也正是由于这点，无论是在 iOS 还是 Android 阵营，我的选择其实都非常少。
-全面屏是否重要 全面屏出现的背景是如今手机的尺寸已经到达人类能够接受的极限，迫不得已只能最大化利用这有限的尺寸。全面屏的价值在于:
-单屏提供更多信息量 视觉美观 衡量全面屏是否重要，屏占比是否越大越好这两个问题，关键是看他们的是否体现了这两个价值。我觉得有以下两个问题是值得思考的:
-如果单屏已经足够呈现用户所需要的信息量了，是否还要继续追求屏占比？ 如果过度追求屏占比反而导致丧失了视觉美观这个价值，是否值得？ 如果我是一个手机的设计者，我的追求会是:
-找到一个足以提供足够信息量的合适屏幕尺寸 这上面这个尺寸基础上追求尽可能的视觉美观 我认为 5 吋的屏幕对我是一个足够大的展示日常软件的尺寸了，而且这个大小无论是对口袋还是手掌都恰到好处。
-另外我也认为刘海屏完完全全是一个没有视觉美感可言的东西。如果屏幕尺寸已经足够，我丝毫不认为有必要为了抢占那一点点的屏幕去设计一个刘海。
-基于这两点，5.5 吋的 Pixel 3 其实是一个恰到好处的设计。5.5 吋加上它比不高的屏占比，屏幕尺寸大概也就接近 5 吋左右。由于前置摄像头必须要有，但一个摄像头又有点浪费额头上那片争议颇多的黄金地段，所以就放了两个前置，可以用来拍摄广角。
-我必须承认当初拿到 Oppo Find X 的时候我是惊艳的，尤其是在晚上看那块全到极致的屏幕。我没有任何理由排斥这种极致的全面屏，但是目前技术的限制导致了这种全面是有高昂代价的。在全面屏上并不存在说有多大技术壁垒，无非是各个厂家的取舍策略不同而已。这种取舍策略背后是对手机的理解。Pixel 3 是目前最符合我对屏幕理解的手机。
-后置双摄是否重要 后置有多少个摄像头的价值在于能否拍到好的照片。如果你能够达到拍到好照片的目的，你没有摄像头都是可以接受的。所以在纠结在摄像头数量是毫无意义的。
-大部分人对拍照的诉求无非是：
-高分辨率 背景虚化 夜景能力 调色 除了调色其余的几点都是高度仰赖镜头本身能力的，所以我认为毫无疑问双摄是很有意义的。
-但 Google 的理念是，希望通过软件的方法把硬件的工作也做了。从技术上我是完全认同这一点的，因为的确具备技术可行性。但遗憾的是 Google 目前并没有在这点上做的很好。
-在「背景虚化」上，目前 Pixel 所模拟出来的算法虚化完全没有办法和光学虚化相比。但在「夜景能力」上，Pixel 的表现还是相当可以，原因也非常简单，进光量直接影响夜景照片的质量，而进光量要么靠快门光圈往上堆，要么就是多张照片合成。即便是在数码单反上，如果你没有三脚架也只能用多张照片合称的办法来堆夜景能力。所以在夜景上，Pixel 仰赖算法已经能够实现接近单反的水准了。至于「高分辨率」早已不是手机相机互相比较的点了，所以也没有太多可说的。</description></item><item><title>从程序到人 —— 情头配对助手的前世今生</title><link>https://blog.joway.io/posts/avatar-matcher/</link><pubDate>Thu, 27 Sep 2018 00:00:00 +0000</pubDate><guid>https://blog.joway.io/posts/avatar-matcher/</guid><description>&lt;h2 id="背景">背景&lt;/h2>
+而一个典型的反面教材是 Git。它是我用过的最复杂同时又是最混乱的 CLI，以一般人最常用的分支操作举例：</description></item><item><title>从程序到人 —— 情头配对助手的前世今生</title><link>https://blog.joway.io/posts/avatar-matcher/</link><pubDate>Thu, 27 Sep 2018 00:00:00 +0000</pubDate><guid>https://blog.joway.io/posts/avatar-matcher/</guid><description>&lt;h2 id="背景">背景&lt;/h2>
 &lt;p>情头(情侣头像)一般指成双成对的头像，可以是真人照片，也可以是卡通人物等图片。衍生出去还有闺密头像和基友头像等等。&lt;/p>
 &lt;p>&lt;img src="https://ik.imagekit.io/elsetech/blog/images/old-blog/1538015444.png?tr=w-1024" alt="">&lt;/p>
 &lt;p>社交媒体上有一个非常令人费解的现象是，如果你去即刻、豆瓣、百度贴吧、微博，会发现有大量的人在上面贴了一个头像，然后寻找和它匹配的另一半头像，例如这样:&lt;/p>
