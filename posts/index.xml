@@ -14,11 +14,11 @@ Who you are 无论是微博、即刻、推特都会有一栏个人简介，大�
 那么我们这一代人心里的那个别墅又是什么。
 自由意志 没有丝毫科学的理由可以相信人拥有绝对的意志自由。风吹树或许会倒，或许不会，意识也是一种物质碰撞下的产物，甚至也是意识间互相碰撞的产物。
 科学规律是限制一切物质自由的枷锁，组合使物质产生多样性，当多样性达到一定程度的丰富度，带给了人一种自由的错觉。
-这个世界上不存在两片一模一样的树叶，但每一片树叶都未曾获得片刻自由。
+风中不存在一模一样的柳絮，但每一丝柳絮都未曾获得自由。
 平面巴别塔 两年前做过一个梦，梦里世界是一个无穷的平面，所有人都在不停向上跳跃，时间在一点点流逝，不断有人跳出不寻常的高度，他们是牛顿，贝多芬，毕加索 &amp;hellip;&amp;hellip;
 这是一个平面的巴别塔，个人主义的巴别塔。巴别塔通天，但是天上的又是什么。
-Pray to Fire 在伊朗设拉子和当地人聊天，谈到亚兹德的拜火教时，我不知道这个教的英文单词是什么，所以说了一句“the people who still pray to fire”，对方赶忙纠正我说，“they are not praying to fire, they are praying to god with fire”。这句话非常简单，却同时点明了一神信仰和反对偶像崇拜这两个最核心的宗教观点。
-一神与多神的区别是什么？多神论者赋予神以意义，一神论者祈求神赋予意义于自身。而反偶像崇拜就是在将意义的赋予权交由上帝。</description></item><item><title>分布式文件系统的演化</title><link>https://blog.joway.io/posts/deep-into-distributed-filesystem/</link><pubDate>Sun, 14 Jun 2020 00:00:00 +0000</pubDate><guid>https://blog.joway.io/posts/deep-into-distributed-filesystem/</guid><description>文件系统是操作系统 IO 栈里非常重要的一个中间层，其存在的意义是为了让上层应用程序有一层更加符合人类直觉的抽象来进行文档的读写，而无需考虑底层存储上的细节。
+Pray to Fire 在伊朗设拉子和当地人聊天，谈到亚兹德的拜火教(即《异星灾变》中的密特拉教原型)时，我不知道这个教的英文单词是什么，所以说了一句“the people who still pray to fire”，对方赶忙纠正我说，“they are not praying to fire, they are praying to god with fire”。这句话非常简单，却同时点明了一神信仰和反对偶像崇拜这两个最核心的宗教观点。
+一神与多神的区别是什么？多神论者赋予神以意义，一神论者祈求神赋予意义于自身存在。而反偶像崇拜就是在将意义的赋予权交由上帝。</description></item><item><title>分布式文件系统的演化</title><link>https://blog.joway.io/posts/deep-into-distributed-filesystem/</link><pubDate>Sun, 14 Jun 2020 00:00:00 +0000</pubDate><guid>https://blog.joway.io/posts/deep-into-distributed-filesystem/</guid><description>文件系统是操作系统 IO 栈里非常重要的一个中间层，其存在的意义是为了让上层应用程序有一层更加符合人类直觉的抽象来进行文档的读写，而无需考虑底层存储上的细节。
 本地文件系统 在讨论分布式文件系统前，我们先来回顾下本地文件系统的组成。
 存储结构 在前面一张图里，我们能够看到文件系统直接和通用块层进行交互，无论底层存储介质是磁盘还是 SSD，都被该层抽象为 Block 的概念。文件系统在初始化时，会先在挂载的块存储上的第一个位置创建一个 Super Block：
 上图右边部分就是一块完整的存储，可以将其想象成一个数组。
