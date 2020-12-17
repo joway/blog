@@ -3,5 +3,4 @@
 func BenchmarkGlobalRand(b *testing.B) { b.RunParallel(func(pb *testing.PB) { for pb.Next() { rand.Intn(100) } }) } func BenchmarkCustomRand(b *testing.B) { b.RunParallel(func(pb *testing.PB) { rd := rand.New(rand.NewSource(time.Now().Unix())) for pb.Next() { rd.Intn(100) } }) } 输出：
 BenchmarkGlobalRand BenchmarkGlobalRand-8 18075486 66.1 ns/op BenchmarkCustomRand BenchmarkCustomRand-8 423686118 2.38 ns/op 解决思路 最理想对情况是可以在每个 goroutine 内创建一个私有的 rand.Rand 对象，从而实现真正的无锁。
 但在很多其他场景下，我们并不能直接控制调用我们的 goroutine，又或者 goroutine 数量过多以至于无法承受这部分内存成本。
-此时的一个思路是使用 sync.Pool 来为 rand.Rand 创建一个池，当多线程并发读写时，优先从自己当前 P 中的 poolLocal 中获取，从而减少锁的竞争。
-基于这个思路，实现了一个 fastrand 库放到了 github。</description></item></channel></rss>
+此时的一个思路是使用 sync.Pool 来为 rand.Source 创建一个池，当多线程并发读写时，优先从自己当前 P 中的 poolLocal 中获取，从而减少锁的竞争。同时由于只是用 pool 扩展了原生的 rngSource 对象，所以可以兼容其 rand.</description></item></channel></rss>
