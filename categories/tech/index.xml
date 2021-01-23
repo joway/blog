@@ -11,7 +11,7 @@ func check(i Interface) { if i == nil { return } impl := i.</description></item>
 func BenchmarkGlobalRand(b *testing.B) { b.RunParallel(func(pb *testing.PB) { for pb.Next() { rand.Intn(100) } }) } func BenchmarkCustomRand(b *testing.B) { b.RunParallel(func(pb *testing.PB) { rd := rand.New(rand.NewSource(time.Now().Unix())) for pb.Next() { rd.Intn(100) } }) } 输出：
 BenchmarkGlobalRand BenchmarkGlobalRand-8 18075486 66.1 ns/op BenchmarkCustomRand BenchmarkCustomRand-8 423686118 2.38 ns/op 解决思路 最理想对情况是可以在每个 goroutine 内创建一个私有的 rand.Rand 对象，从而实现真正的无锁。
 但在很多其他场景下，我们并不能直接控制调用我们的 goroutine，又或者 goroutine 数量过多以至于无法承受这部分内存成本。
-此时的一个思路是使用 sync.Pool 来为 rand.Source 创建一个池，当多线程并发读写时，优先从自己当前 P 中的 poolLocal 中获取，从而减少锁的竞争。同时由于只是用 pool 扩展了原生的 rngSource 对象，所以可以兼容其 rand.</description></item><item><title>分布式文件系统的演化</title><link>https://blog.joway.io/posts/deep-into-distributed-filesystem/</link><pubDate>Sun, 14 Jun 2020 00:00:00 +0000</pubDate><guid>https://blog.joway.io/posts/deep-into-distributed-filesystem/</guid><description>文件系统是操作系统 IO 栈里非常重要的一个中间层，其存在的意义是为了让上层应用程序有一层更加符合人类直觉的抽象来进行文档的读写，而无需考虑底层存储上的细节。
+此时的一个思路是使用 sync.Pool 来为 rand.Source 创建一个池，当多线程并发读写时，优先从自己当前 P 中的 poolLocal 中获取，从而减少锁的竞争。同时由于只是用 pool 扩展了原生的 rngSource 对象，所以可以兼容其 rand.</description></item><item><title>分布式文件系统的演化</title><link>https://blog.joway.io/posts/deep-into-distributed-filesystem/</link><pubDate>Sun, 14 Jun 2020 00:00:00 +0000</pubDate><guid>https://blog.joway.io/posts/deep-into-distributed-filesystem/</guid><description>文件系统是操作系统 IO 栈里非常重要的一个中间层，其存在的意义是为了让上层应用程序有一层更加符合人类直觉的抽象来进行文档的读写，而无需考虑底层存储上的细节。
 本地文件系统 在讨论分布式文件系统前，我们先来回顾下本地文件系统的组成。
 存储结构 在前面一张图里，我们能够看到文件系统直接和通用块层进行交互，无论底层存储介质是磁盘还是 SSD，都被该层抽象为 Block 的概念。文件系统在初始化时，会先在挂载的块存储上的第一个位置创建一个 Super Block：
 上图右边部分就是一块完整的存储，可以将其想象成一个数组。
