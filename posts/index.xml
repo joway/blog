@@ -1,4 +1,16 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on Random Thoughts</title><link>https://blog.joway.io/posts/</link><description>Recent content in Posts on Random Thoughts</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Tue, 09 Mar 2021 00:00:00 +0000</lastBuildDate><atom:link href="https://blog.joway.io/posts/index.xml" rel="self" type="application/rss+xml"/><item><title>科学，技术与工程</title><link>https://blog.joway.io/posts/science-technology-and-engineering/</link><pubDate>Tue, 09 Mar 2021 00:00:00 +0000</pubDate><guid>https://blog.joway.io/posts/science-technology-and-engineering/</guid><description>作为软件工程师，我们在谈论自己时，总会认为自己是所谓的高科技行业从业者，但是如果观察自己的日常工作，时常会觉得似乎和真正的科技也没有什么关系。所以究竟什么是科技？我们要如何来定义我们每天的工作？
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on Random Thoughts</title><link>https://blog.joway.io/posts/</link><description>Recent content in Posts on Random Thoughts</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Wed, 07 Apr 2021 00:00:00 +0000</lastBuildDate><atom:link href="https://blog.joway.io/posts/index.xml" rel="self" type="application/rss+xml"/><item><title>RPC 漫谈 - 限流问题</title><link>https://blog.joway.io/posts/deep-into-rpc-ratelimiter/</link><pubDate>Wed, 07 Apr 2021 00:00:00 +0000</pubDate><guid>https://blog.joway.io/posts/deep-into-rpc-ratelimiter/</guid><description>微服务之间的 RPC 调用往往会使用到限流功能，但是很多时候我们都是用很简单的限流策略，亦或是工程师拍脑袋定一个限流值。
+这篇文章主要讨论在 RPC 限流中，当前存在的问题和可能的解决思路。
+为什么需要限流 避免连锁崩溃 一个服务即便进行过压测，但当真实运行到线上时，其收到的请求流量以及能够负载的流量是不固定的，如果服务自身没有一个自我保护机制，当流量超过预计的负载后，会将这部分负载传递给该服务的下游，造成连锁反应甚至雪崩。
+提供可靠的响应时间 服务调用方一般都设有超时时间，如果一个服务由于拥塞，导致响应时间都处于超时状态，那么即便服务最终正确提供了响应，对于 Client 来说也完全没有意义。
+一个服务对于调用方提供的承诺既包含了响应的结果，也包含了响应的时间。限流能够让服务自身通过主动丢弃负载能力外的流量，以达到在额定负载能力下，依然能够维持有效的响应效率。
+传统方案 漏斗 优点：
+能够强制限制出口流量速率 缺点：
+无法适应突发性流量 令牌桶 优点：
+在统计上维持一个特定的平均速度 在局部允许短暂突发性流量通过 存在的问题 在两类传统方案中，都需要去指定一个固定值用以标明服务所能够接受的负载，但在现代的微服务架构中，一个服务的负载能力往往是会不断变化的，有以下几个常见的原因：
+随着新增代码性能变化而变化 随着服务依赖的下游性能变化而变化 随着服务部署的机器(CPU/磁盘)性能变化而变化 随着服务部署的节点数变化而变化 随着业务需求变化而变化 随着一天时间段变化而变化 通过人工声明一个服务允许的负载值，即便这个值是维护在配置中心可以动态变化，但依然是不可持续维护的，况且该值具体设置多少也极度依赖于人的个人经验和判断。甚至人自身的小心思也会被带入到这个值的选择中，例如 Server 会保守估计自己的能力，Client 会过多声明自己的需求，长期以往会导致最终的人为设定值脱离了实际情况。
+什么是服务负载 当我们向一个服务发起请求时，我们关心的无外乎两点：
+服务能够支撑的同时并发请求数 服务的响应时间 并发请求数 对于 Server 而言，有几个指标常常容易搞混：
+当前连接数 当前接受的请求数 当前正在并发处理的请求数 QPS 连接数和请求数是 1:N 的关系。在现代 Server 的实现中，连接本身消耗的服务器资源已经非常少了（例如 Java Netty 实现，Go Net 实现等），而且一般对内网的服务而言，多路复用时，请求数变多也并不一定会导致连接数变多。</description></item><item><title>科学，技术与工程</title><link>https://blog.joway.io/posts/science-technology-and-engineering/</link><pubDate>Tue, 09 Mar 2021 00:00:00 +0000</pubDate><guid>https://blog.joway.io/posts/science-technology-and-engineering/</guid><description>作为软件工程师，我们在谈论自己时，总会认为自己是所谓的高科技行业从业者，但是如果观察自己的日常工作，时常会觉得似乎和真正的科技也没有什么关系。所以究竟什么是科技？我们要如何来定义我们每天的工作？
 我认为宏观意义上的科技可以被拆解成三个概念：科学(Science)，技术(Technology)和工程(Engineering)。
 科学是观察客观世界以发现既有的自然规律，技术是组合自然规律以发明新的改造客观世界的方法，工程是发挥技术的能力以合乎客观世界要求的方去改造它。
 欧姆定律，麦克斯韦方程组是科学的发现，整个电子产业的基石全在于控制电子的运动与电场的传递，电子的运动建构了存储和计算的能力，电场的传递建构了通信能力。电子的运动一定会遵守欧姆定律，电场的传递一定会遵循麦克斯韦方程组。
