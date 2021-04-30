@@ -7,7 +7,7 @@ type User struct { Name string Email string } Name 和 Email 分别表示两块�
 message User { string name = 1; string email = 2;}生成 Stub 代码 无论使用什么样的序列化方法，最终的目的是要变成程序中里的一个对象，虽然序列化方法往往是语言无关的，但这段将内存空间与程序内部表示（如 struct/class）相绑定的过程却是语言相关的，所以很多序列化库才会需要提供对应的编译器，将 IDL 文件编译成目标语言的 Stub 代码。
 Stub 代码内容一般分为两块：
 类型结构体生成（即目标语言的 Struct[Golang]/Class[Java] ） 序列化/反序列化代码生成（将二进制流与目标语言结构体相转换） 下面是一段 Thrift 生成的的序列化 Stub 代码：
-//写入 User struct func (p *User) Write(oprot thrift.</description></item><item><title>RPC 漫谈： 限流问题</title><link>https://blog.joway.io/posts/deep-into-rpc-ratelimiter/</link><pubDate>Fri, 23 Apr 2021 00:00:00 +0000</pubDate><guid>https://blog.joway.io/posts/deep-into-rpc-ratelimiter/</guid><description>微服务之间的 RPC 调用往往会使用到限流功能，但是很多时候我们都是用很简单的限流策略，亦或是工程师拍脑袋定一个限流值。
+type User struct { Name string `thrift:&amp;#34;name,1&amp;#34; db:&amp;#34;name&amp;#34; json:&amp;#34;name&amp;#34;` Email string `thrift:&amp;#34;email,2&amp;#34; db:&amp;#34;email&amp;#34; json:&amp;#34;email&amp;#34;` } //写入 User struct func (p *User) Write(oprot thrift.</description></item><item><title>RPC 漫谈： 限流问题</title><link>https://blog.joway.io/posts/deep-into-rpc-ratelimiter/</link><pubDate>Fri, 23 Apr 2021 00:00:00 +0000</pubDate><guid>https://blog.joway.io/posts/deep-into-rpc-ratelimiter/</guid><description>微服务之间的 RPC 调用往往会使用到限流功能，但是很多时候我们都是用很简单的限流策略，亦或是工程师拍脑袋定一个限流值。
 这篇文章主要讨论在 RPC 限流中，当前存在的问题和可能的解决思路。
 为什么需要限流 避免连锁崩溃 一个服务即便进行过压测，但当真实运行到线上时，其收到的请求流量以及能够负载的流量是不固定的，如果服务自身没有一个自我保护机制，当流量超过预计的负载后，会将这部分负载传递给该服务的下游，造成连锁反应甚至雪崩。
 提供可靠的响应时间 服务调用方一般都设有超时时间，如果一个服务由于拥塞，导致响应时间都处于超时状态，那么即便服务最终正确提供了响应，对于 Client 来说也完全没有意义。
