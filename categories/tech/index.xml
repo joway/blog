@@ -7,7 +7,7 @@ TCP 协议栈一般由操作系统实现，因为连接是有状态对，所以�
 在 Linux 视角中，每个连接都是一个文件，都会占用一个文件描述符。文件描述符所占用的内存已经计算在上面的内存开销中，但操作系统为了保护其自身的稳定性和安全性，会限制整个系统内以及每个进程中可被同时打开的最大文件描述符数：
 # 机器配置: Linux 1 核 1 GB $ cat /proc/sys/fs/file-max 97292 $ ulimit -n 1024 上面的设置表示整个操作系统最多能同时打开 97292 个文件，每个进程最多同时打开 1024 个文件。
 严格来说文件描述符根本算不上是一个资源，真正的资源是内存。如果你有明确的需要，完全可以通过设置一个极大值，让所有应用绕开这个限制。
-线程开销：
+线程开销：
 有一些较老的 Server 实现采用的还是为每个连接独占（新建或从连接池中获取）一个线程提供服务的方式，对于这类服务来说，除了连接本身占用的外，还有线程的固定内存开销：
 # 机器配置: Linux 1 核 1 GB # 操作系统最大线程数 $ cat /proc/sys/kernel/threads-max 7619 # 操作系统单进程最大线程数，undef 表示未限制 $ cat /usr/include/bits/local_lim.</description></item><item><title>RPC 漫谈：序列化问题</title><link>https://blog.joway.io/posts/deep-into-rpc-serialization/</link><pubDate>Fri, 30 Apr 2021 00:00:00 +0000</pubDate><guid>https://blog.joway.io/posts/deep-into-rpc-serialization/</guid><description>何为序列 对于计算机而言，一切数据皆为二进制序列。但编程人员为了以人类可读可控的形式处理这些二进制数据，于是发明了数据类型和结构的概念，数据类型用以标注一段二进制数据的解析方式，数据结构用以标注多段(连续/不连续)二进制数据的组织方式。
 例如以下程序结构体：
