@@ -258,17 +258,17 @@ $ kubectl config [action] [flags] [args] 我几乎每天都会用到 kubectl，�
 但是这里面有一个陷阱是，你如何认为你自己的思维方式就一定是正确的。如果你恰好相信科学，那比较遗憾，科学是一个完全依赖在经验基础上的，其最大的特质就是可证伪性，也就是存在有一天科学发现自己是不科学的可能性。但正是因为我们永远无法确保自己发现了真理，所以追求真理才有它的价值。这个追求真理的过程，我认为就是不断促使自己思维方式的提升。
 我最近想明白了一个事情，就是衡量一个好的文章/书籍/播客/文艺作品的标准是什么。在我个人这里，很大的一点取决于它是在传播观点还是传播思维方式。所以我认为王小波是伟大的，很多著名的民运人士是卑微的。王小波在传播自由的精神，很多民运人士只是在传播自由的名词。</description></item><item><title>从程序到人 —— 情头配对助手的前世今生</title><link>https://blog.joway.io/posts/avatar-matcher/</link><pubDate>Thu, 27 Sep 2018 00:00:00 +0000</pubDate><guid>https://blog.joway.io/posts/avatar-matcher/</guid><description>&lt;h2 id="背景">背景&lt;/h2>
 &lt;p>情头(情侣头像)一般指成双成对的头像，可以是真人照片，也可以是卡通人物等图片。衍生出去还有闺密头像和基友头像等等。&lt;/p>
-&lt;p>&lt;img src="https://ik.imagekit.io/elsetech/blog/images/old-blog/1538015444.png?tr=w-1024" alt="">&lt;/p>
+&lt;p>&lt;img src="https://ik.imagekit.io/elsetech/blog/images/old-blog/1538015444.png?tr=w-1024">&lt;/p>
 &lt;p>社交媒体上有一个非常令人费解的现象是，如果你去即刻、豆瓣、百度贴吧、微博，会发现有大量的人在上面贴了一个头像，然后寻找和它匹配的另一半头像，例如这样:&lt;/p>
-&lt;p>&lt;img src="https://ik.imagekit.io/elsetech/blog/images/old-blog/1538016090.png?tr=w-1024" alt="">&lt;/p>
+&lt;p>&lt;img src="https://ik.imagekit.io/elsetech/blog/images/old-blog/1538016090.png?tr=w-1024">&lt;/p>
 &lt;p>市面上的情侣头像大多是一些社区里的大佬自己制作出来的，然后发到社区里，再慢慢流传开来。这种传播方式导致了很多情头在传播时候早就被拆散了。很多人可能只找到了其中一个，但是想要找到和它配对的另一半。&lt;/p>
 &lt;p>还有一个问题是，当你看到一个头像时，没有人能够确定这个头像是否在制作时候就有另外一半。&lt;/p>
 &lt;p>一些程序员朋友最早看到这个问题时，总会天真地想去搜索引擎里识图一下就行了。但这里有两个非常有趣的问题:&lt;/p>
 &lt;p>第一个是目前搜索引擎的识别图片能力其实并不强，比如以 All in AI 著称的百度:&lt;/p>
-&lt;p>&lt;img src="https://ik.imagekit.io/elsetech/blog/images/old-blog/1538016451.png?tr=w-1024" alt="">&lt;/p>
+&lt;p>&lt;img src="https://ik.imagekit.io/elsetech/blog/images/old-blog/1538016451.png?tr=w-1024">&lt;/p>
 &lt;p>这还是在图片是原图的情况下，经常一些小朋友会在情头上自己二次创作，比如裁剪，比如压缩，比如贴上什么爱心。那样基本上识图就废了。&lt;/p>
 &lt;p>第二个问题更加有趣，情头的特点就是大家都在用，所以在最理想的情况下，即便搜索引擎能够识别出所有有这个头像的网站，出来的结果也并没有什么用处，无非是找到了也在用这个头像的别的网站的用户。&lt;/p>
-&lt;p>&lt;img src="https://ik.imagekit.io/elsetech/blog/images/old-blog/1538016570.png?tr=w-1024" alt="">&lt;/p>
+&lt;p>&lt;img src="https://ik.imagekit.io/elsetech/blog/images/old-blog/1538016570.png?tr=w-1024">&lt;/p>
 &lt;p>只有一种情况是真正能够帮助到寻找情侣头像这件事情的，那就是搜索引擎出来的结果里是专门搜集匹配好的情头的站点。那样姑且用户还能点进网页里去找到另外一半。&lt;/p>
 &lt;p>从上述阐述里不难发现，指望一个未成年小女生使用一系列高级互联网骚操作找一个头像是有多么不现实，何况技术上可行性还很低。&lt;/p></description></item><item><title>即刻多端实时通信实践</title><link>https://blog.joway.io/posts/socket-io/</link><pubDate>Tue, 18 Sep 2018 00:00:00 +0000</pubDate><guid>https://blog.joway.io/posts/socket-io/</guid><description>背景 jike-io 是即刻基于 socket.io 构建的一个实时通信基础设施。目前客户端上的所有实时通信服务都是建立在其基础上，涵盖了私信、消息通知、用户反馈、活动页小游戏等诸多组件。
 在目前即刻的实时通信设计里，我们的实时通信只是为了让服务端主动推送消息给客户端，客户端不会主动通过 websocket 发送消息。由于几乎我们所有需要发送消息的请求都会有一定业务逻辑在，而这个业务逻辑我们并不希望 websocket 连接层(jike-io)去处理，所以我们仍旧采用传统 HTTP 请求的方式去发送请求。至于之后是否需要推送消息给用户，由服务端调用 jike-io 的接口进行实现。
