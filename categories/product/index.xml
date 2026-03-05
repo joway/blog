@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Product on Random Thoughts</title><link>https://blog.joway.io/categories/product/</link><description>Recent content in Product on Random Thoughts</description><generator>Hugo</generator><language>cn</language><lastBuildDate>Thu, 05 Mar 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://blog.joway.io/categories/product/index.xml" rel="self" type="application/rss+xml"/><item><title>Magic Brush - 画出你自己的产品宇宙</title><link>https://blog.joway.io/posts/magic-brush/</link><pubDate>Thu, 05 Mar 2026 00:00:00 +0000</pubDate><guid>https://blog.joway.io/posts/magic-brush/</guid><description>&lt;p>上周末用 AI 写了一个新的产品： &lt;a href="https://brush.elsetech.app">Magic Brush&lt;/a>。&lt;/p>
+&lt;p>这个产品的 idea 来自于我经常用 AI vibe coding 一些小的前端产品，但是如果每次都为这些小产品创建独立的域名和部署太过于繁琐，而且目前也缺乏一个聚合站点可以浏览其他人创建的小产品。另外，我在写博客的时候，也经常会想要插入一些交互页面来展示我的 idea，但是如果要在博客里插入一堆 js/css 代码又会导致博客无法长期维护。我把这些需求收集了下，整理并抽象出了一个产品形态：&lt;/p>
+&lt;blockquote>
+&lt;p>这个产品可以允许用户使用自然语言创作页面，然后通过 &lt;code>iframe&lt;/code> 嵌入到任意网页中去。并且这个产品还可以有一个广场功能，可以看到其他人的作品。不仅仅能用来做博客的交互页面插入，也可以作为产品原型设计的工具。&lt;/p>&lt;/blockquote>
+&lt;h2 id="产品设计">产品设计&lt;/h2>
+&lt;p>&lt;a href="https://brush.elsetech.app">Magic Brush&lt;/a> 由 2 主要页面组成。&lt;/p>
+&lt;h3 id="页面设计页">页面设计页&lt;/h3>
+&lt;p>用户可以在设计页右边会话框写自己的提示词与 AI 交互，左边的页面会实时渲染最新的页面。其他用户可以以只读的方式访问该页面，并且也能看到提示词，方便其他人模仿修改并创建自己的页面。&lt;/p>
+&lt;p>&lt;img src="https://blog.joway.io/images/magic-brush/preview.png" alt="">&lt;/p>
+&lt;h3 id="广场页">广场页&lt;/h3>
+&lt;p>广场页面允许看到所有 Public 的页面设计，可以以 Like 数量排序或者时间排序：&lt;/p>
+&lt;iframe src="https://brush.elsetech.app/square" style="width:100%;height:600px;border:0;" loading="lazy">&lt;/iframe>
+&lt;h2 id="use-cases">Use Cases&lt;/h2>
+&lt;h3 id="创作可交互文章">创作可交互文章&lt;/h3>
+&lt;p>对于有些文章来说，文字并不是最适宜的表达载体，例如游记。你可以把你的游记喂给 AI 生成可交互的页面，然后再插入到文章中。例如我的 &lt;a href="https://blog.joway.io/posts/japan-kumano-kodo/">&amp;laquo;熊野古道中边路纪行&amp;raquo;&lt;/a> 游记中，可以被转变为：&lt;/p>
+&lt;iframe src="https://brush-api.elsetech.app/pages/2ZkCB6KD0F" style="width:100%;height:2500px;border:0;" loading="lazy">&lt;/iframe>
+&lt;h3 id="创作流程图">创作流程图&lt;/h3>
+&lt;p>传统流程图需要用截图的形式插入到文章，导致不易修改。我们可以让 AI 生成流程图页面，然后直接插入到文章中，并且后续实时渲染最新的修改。&lt;/p>
+&lt;iframe src="https://brush-api.elsetech.app/pages/KBDTrLJfrt" style="width:100%;height:600px;border:0;" loading="lazy">&lt;/iframe>
+&lt;h3 id="创作自定义工具">创作自定义工具&lt;/h3>
+&lt;p>你还可以根据自己需要，写一个自己用的趁手的前端工具，例如：&lt;/p>
+&lt;iframe src="https://brush-api.elsetech.app/pages/l6IldHx-Ol" style="width:100%;height:600px;border:0;" loading="lazy">&lt;/iframe>
+&lt;p>甚至能在网页上插入一个小型浏览器:&lt;/p>
+&lt;iframe src="https://brush-api.elsetech.app/pages/cJ3w_m4e3K" style="width:100%;height:600px;border:0;" loading="lazy">&lt;/iframe>
+&lt;p>这些工具都能用 &lt;code>https://brush-api.elsetech.app/pages/cJ3w_m4e3K&lt;/code> 的方式作为工具本身全屏打开。&lt;/p>
+&lt;h2 id="实现过程">实现过程&lt;/h2>
+&lt;p>&lt;a href="https://brush.elsetech.app">Magic Brush&lt;/a> 的实现非常简单优雅，整个 Design Agent 在前端运行，后端代码无法拿到用户的 API Token。后端部署在 Cloudflare Worker 上，数据库使用 Cloudflare R2 。整个产品的维护成本接近于 0，除非用户变多。&lt;/p>
+&lt;p>Design Agent 的设计与传统 Code Agent 类似，约束是产出只能是一个 HTML 文件。在最开始的时候模型会返回一个根据初始提示词生成的 HTML 页面作为起始文件，而在后续 Modify 过程中，只允许调用一系列 tool call 来修改页面，最大化减少了 token 的消耗。&lt;/p></description></item></channel></rss>
