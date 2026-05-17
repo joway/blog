@@ -1,4 +1,28 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Tech on Random Thoughts</title><link>https://blog.joway.io/categories/tech/</link><description>Recent content in Tech on Random Thoughts</description><generator>Hugo</generator><language>cn</language><lastBuildDate>Tue, 10 Dec 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://blog.joway.io/categories/tech/index.xml" rel="self" type="application/rss+xml"/><item><title>重新思考 Go：了解程序在线上是如何运行的</title><link>https://blog.joway.io/posts/golang-rethink-program-in-realworld/</link><pubDate>Tue, 10 Dec 2024 00:00:00 +0000</pubDate><guid>https://blog.joway.io/posts/golang-rethink-program-in-realworld/</guid><description>&lt;blockquote>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Tech on Random Thoughts</title><link>https://blog.joway.io/categories/tech/</link><description>Recent content in Tech on Random Thoughts</description><generator>Hugo</generator><language>cn</language><lastBuildDate>Sun, 17 May 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://blog.joway.io/categories/tech/index.xml" rel="self" type="application/rss+xml"/><item><title>LLM 训练与推理的基本理解</title><link>https://blog.joway.io/posts/deep-into-llm/</link><pubDate>Sun, 17 May 2026 00:00:00 +0000</pubDate><guid>https://blog.joway.io/posts/deep-into-llm/</guid><description>&lt;p>学习一个技术最好的方式就是能够写一片文章把这个技术的原理解释清楚，本文记录了我在阅读 《Build a Large Language Model (From Scratch)》一书以及和 Claude Code 对话过程中的笔记，仅供参考。&lt;/p>
+&lt;h1 id="术语解释">术语解释&lt;/h1>
+&lt;h2 id="向量点积">向量点积&lt;/h2>
+&lt;p>定义：向量点积为标量&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">a = (a1, a2, a3)
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">b = (b1, b2, b3)
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">a · b = a1*b1 + a2*b2 + a3*b3
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>几何意义：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">a · b = |a| |b| cos(theta)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>其中 theta 是两个向量的夹角。&lt;/p>
+&lt;p>用途：衡量向量相似度&lt;/p>
+&lt;h2 id="矩阵转置">矩阵转置&lt;/h2>
+&lt;p>符号表示：Kᵀ&lt;/p>
+&lt;p>定义：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">A =
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">1 2 3
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">4 5 6
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">Aᵀ =
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">1 4
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">2 5
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">3 6
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="线性层">线性层&lt;/h2>
+&lt;p>假设某个词的向量是 2 个数字：x = [2, 5]。我要 3 个输出，就准备 3 个配方（权重和偏置都是训练学出来的数字）：&lt;/p></description></item><item><title>重新思考 Go：了解程序在线上是如何运行的</title><link>https://blog.joway.io/posts/golang-rethink-program-in-realworld/</link><pubDate>Tue, 10 Dec 2024 00:00:00 +0000</pubDate><guid>https://blog.joway.io/posts/golang-rethink-program-in-realworld/</guid><description>&lt;blockquote>
 &lt;p>重新思考 Go 系列：这个系列希望结合工作中在 Go 编程与性能优化中遇到过的问题，探讨 Go 在语言哲学、底层实现和现实需求三者之间关系与矛盾。&lt;/p>&lt;/blockquote>
 &lt;h2 id="前言">前言&lt;/h2>
 &lt;p>过去一段时间，在大量的线上服务 case study 过程中，逐步深入了解了如今的业务 Go 进程是如何在一系列繁杂的基础设施之上运行的。有些表现在意料之中，也有一些出乎意料的发现。&lt;/p>

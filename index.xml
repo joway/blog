@@ -1,4 +1,28 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Random Thoughts</title><link>https://blog.joway.io/</link><description>Recent content on Random Thoughts</description><generator>Hugo</generator><language>cn</language><lastBuildDate>Mon, 30 Mar 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://blog.joway.io/index.xml" rel="self" type="application/rss+xml"/><item><title>昨日的世界不再重来</title><link>https://blog.joway.io/posts/the-past-before-ai/</link><pubDate>Mon, 30 Mar 2026 00:00:00 +0000</pubDate><guid>https://blog.joway.io/posts/the-past-before-ai/</guid><description>&lt;p>最近在做一个思想实验，如果你面前有一个按钮，按下就可以让 AI 从世界上消失，你是否会按下。身边很多朋友的答案都是会毫不犹豫的按下，即便有一些人还是那种最拥抱 AI 的人。&lt;/p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Random Thoughts</title><link>https://blog.joway.io/</link><description>Recent content on Random Thoughts</description><generator>Hugo</generator><language>cn</language><lastBuildDate>Sun, 17 May 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://blog.joway.io/index.xml" rel="self" type="application/rss+xml"/><item><title>LLM 训练与推理的基本理解</title><link>https://blog.joway.io/posts/deep-into-llm/</link><pubDate>Sun, 17 May 2026 00:00:00 +0000</pubDate><guid>https://blog.joway.io/posts/deep-into-llm/</guid><description>&lt;p>学习一个技术最好的方式就是能够写一片文章把这个技术的原理解释清楚，本文记录了我在阅读 《Build a Large Language Model (From Scratch)》一书以及和 Claude Code 对话过程中的笔记，仅供参考。&lt;/p>
+&lt;h1 id="术语解释">术语解释&lt;/h1>
+&lt;h2 id="向量点积">向量点积&lt;/h2>
+&lt;p>定义：向量点积为标量&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">a = (a1, a2, a3)
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">b = (b1, b2, b3)
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">a · b = a1*b1 + a2*b2 + a3*b3
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>几何意义：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">a · b = |a| |b| cos(theta)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>其中 theta 是两个向量的夹角。&lt;/p>
+&lt;p>用途：衡量向量相似度&lt;/p>
+&lt;h2 id="矩阵转置">矩阵转置&lt;/h2>
+&lt;p>符号表示：Kᵀ&lt;/p>
+&lt;p>定义：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">A =
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">1 2 3
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">4 5 6
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">Aᵀ =
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">1 4
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">2 5
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">3 6
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="线性层">线性层&lt;/h2>
+&lt;p>假设某个词的向量是 2 个数字：x = [2, 5]。我要 3 个输出，就准备 3 个配方（权重和偏置都是训练学出来的数字）：&lt;/p></description></item><item><title>昨日的世界不再重来</title><link>https://blog.joway.io/posts/the-past-before-ai/</link><pubDate>Mon, 30 Mar 2026 00:00:00 +0000</pubDate><guid>https://blog.joway.io/posts/the-past-before-ai/</guid><description>&lt;p>最近在做一个思想实验，如果你面前有一个按钮，按下就可以让 AI 从世界上消失，你是否会按下。身边很多朋友的答案都是会毫不犹豫的按下，即便有一些人还是那种最拥抱 AI 的人。&lt;/p>
 &lt;p>拥抱 AI 和厌恶 AI 可以同时在一个人身上发生，我自己就是这样的人。我厌恶 AI，是因为对昨日世界的怀念，我拥抱 AI，是因为今日世界无法回退，我没有不拥抱的选择。&lt;/p>
 &lt;p>现在的 AI 虽然可以代替我完成很多事情，但是在事情完成后，带给我的并不是成就感而是一种无尽的空虚。有了一个 idea，找一个趁手的模型，用几句提示词让 AI 吭哧吭哧干活，再做几轮调整，最后几个小时项目完成了，剩下一段贤者时间，你不知道这个项目数据库的 schema，也不确定架构是否能支撑多少的用户规模，未来有新的需求，你只能对着这个黑盒许愿，在许愿前完全没有关于需求可行性的任何概念。当 AI 给你完成了修改后，你不知道会不会损坏已有的用户的数据，只能按照 AI 的要求上线。一通操作下来，身体很累，精神很空虚，干了一天的活，又好像什么也没干。伫立在这个黑盒面前，反反复复操作几个月，不知道自己究竟学到了什么。AI 有了更多的数据，一天天变得更聪明，而我们自己呢？&lt;/p>
 &lt;p>在昨日的世界，虽然我们工作很累，但是工作结束会有一种智力的满足。当其他人来咨询某个需求是否可行，我们可以给出斩钉截铁的答案。当需求可行的时候，我们知道需要修改哪些地方让它可行，当需求不可行的时候，我们知道因为哪些原因所以它不可行。我们面对的是一个充满确定性的世界，我们确定昨天的工作，确定明天的工作，确定自己的职业生涯，确定未来能够有一份收入养家糊口生儿育女。今日的世界一切都不确定，不确定昨天做了什么，不确定明天会做什么，不确定这每天光聊天的工作能否有职业生涯，不确定未来什么样的人才可能凌驾于 AI 之上能有一份糊口的工作。&lt;/p>
